@@ -285,4 +285,41 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     ) {
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
     }
+
+    private boolean b_override;
+    private double d_forward;
+    private double d_strafe;
+    private double d_rotate;
+
+    public void setDriverOverride(boolean b) {
+        b_override = b;
+    }
+
+    public boolean getDriverOverride() {
+        return b_override;
+    }
+
+    public void setFoward(double s) {
+        d_forward = s;
+    }
+
+    public double getForward() {
+        return d_forward;
+    }
+
+    public void setStrafe(double s) {
+        d_strafe = s;
+    }
+
+    public double getStrafe() {
+        return d_strafe;
+    }
+
+    public void setRotate(double s) {
+        d_rotate = s;
+    }
+
+    public double getRotate() {
+        return d_rotate;
+    }
 }
