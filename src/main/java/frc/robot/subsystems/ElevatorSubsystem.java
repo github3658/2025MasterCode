@@ -32,8 +32,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     /**
      * Constructs the Elevator Subsystem
      */
-    public ElevatorSubsystem() {
-    }
+    public ElevatorSubsystem() { }
 
     /**
      * Given an elevator level, will set the elevator subsystem to that level.
