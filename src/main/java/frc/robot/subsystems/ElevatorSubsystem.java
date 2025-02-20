@@ -3,7 +3,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Elevator extends SubsystemBase {
+public class ElevatorSubsystem extends SubsystemBase {
     // Up and down, reads limit switches
     // 3 pre-programmed stages accessible by button panel
     // Adjusts swerve speed for safety
@@ -32,7 +32,7 @@ public class Elevator extends SubsystemBase {
     /**
      * Constructs the Elevator Subsystem
      */
-    public Elevator() {
+    public ElevatorSubsystem() {
     }
 
     /**

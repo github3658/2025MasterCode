@@ -8,9 +8,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.SwerveDrivetrainSubsystem;
 
-public class DriveToPose extends Command {
+public class DriveToPoseCommand extends Command {
 
     // 1 UNIT ~ 50 cm
 
@@ -46,9 +46,9 @@ public class DriveToPose extends Command {
     private final SwerveRequest.FieldCentric drive_field = new SwerveRequest.FieldCentric()
     .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-    private CommandSwerveDrivetrain s_Swerve;
+    private SwerveDrivetrainSubsystem s_Swerve;
 
-    public DriveToPose(CommandSwerveDrivetrain s, Pose2d target) {
+    public DriveToPoseCommand(SwerveDrivetrainSubsystem s, Pose2d target) {
         s_Swerve = s;
         p_TargetPose = target;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
         addRequirements(s_Swerve);

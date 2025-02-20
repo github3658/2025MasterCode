@@ -4,7 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Climb extends SubsystemBase {
+public class ClimbSubsystem extends SubsystemBase {
 
     private TalonFX m_LiftMotor = new TalonFX(51, "3658CANivore");
 

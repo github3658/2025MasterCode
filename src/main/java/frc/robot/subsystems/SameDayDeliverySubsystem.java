@@ -6,7 +6,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class SameDayDelivery extends SubsystemBase {
+public class SameDayDeliverySubsystem extends SubsystemBase {
     // These values are temporary, and should reflect the values of the CANcoder at these positions in the end.
     public enum PivotTarget {
         CoralIntake(0),
@@ -28,7 +28,7 @@ public class SameDayDelivery extends SubsystemBase {
 
     private PivotTarget pt_PivotTarget;
 
-    public SameDayDelivery() {
+    public SameDayDeliverySubsystem() {
         pt_PivotTarget = PivotTarget.CoralIntake;
     }
 

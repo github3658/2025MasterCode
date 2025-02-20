@@ -3,15 +3,15 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.ButtonPanel;
 import frc.robot.ButtonPanel.Button;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Elevator.Level;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.Level;
 
-public class ElevatorDefault extends Command {
+public class ElevatorDefaultCommand extends Command {
 
-    private Elevator s_Elevator;
+    private ElevatorSubsystem s_Elevator;
     private ButtonPanel bp_Operator;
 
-    public ElevatorDefault(Elevator e, ButtonPanel bp) {
+    public ElevatorDefaultCommand(ElevatorSubsystem e, ButtonPanel bp) {
         s_Elevator = e;
         bp_Operator = bp;
         addRequirements(s_Elevator);

@@ -26,15 +26,17 @@ public class Robot extends TimedRobot {
 
   // This is the operator's button panel.
   // This is a custom class I made that lets you check for input using a Button enum.
-  // private ButtonPanel bp_Operator = new ButtonPanel(1);
+  //
+  
+  //private ButtonPanel bp_Operator = new ButtonPanel(1);
 
-  private CommandSwerveDrivetrain s_Swerve = TunerConstants.createDrivetrain();
+  private SwerveDrivetrainSubsystem s_Swerve = TunerConstants.createDrivetrain();
   //private Elevator s_Elevator = new Elevator();
   //private SameDayDelivery s_EndEffector = new SameDayDelivery();
 
   @Override
   public void robotInit() {
-    s_Swerve.setDefaultCommand(new SwerveDrive(s_Swerve, xb_Driver));
+    s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, xb_Driver));
     //s_Elevator.setDefaultCommand(new ElevatorDefault(s_Elevator, bp_Operator));
     //s_EndEffector.setDefaultCommand(new EndEffectorDefault(s_EndEffector, bp_Operator, s_Elevator));
   }
@@ -89,9 +91,9 @@ public class Robot extends TimedRobot {
     // Y = 1.2
     // ROT = -60
     new SequentialCommandGroup(
-		  new DriveToPose(s_Swerve, new Pose2d(new Translation2d(1.5, 0), new Rotation2d())),
-		  new DriveToPose(s_Swerve, new Pose2d(new Translation2d(3.95, 1.5), new Rotation2d(Math.toRadians(-60)))),
-		  new DriveToPose(s_Swerve, new Pose2d(new Translation2d(3.95, 1.2), new Rotation2d(Math.toRadians(-60))))
+		  new DriveToPoseCommand(s_Swerve, new Pose2d(new Translation2d(1.5, 0), new Rotation2d())),
+		  new DriveToPoseCommand(s_Swerve, new Pose2d(new Translation2d(3.95, 1.5), new Rotation2d(Math.toRadians(-60)))),
+		  new DriveToPoseCommand(s_Swerve, new Pose2d(new Translation2d(3.95, 1.2), new Rotation2d(Math.toRadians(-60))))
 		).schedule();
     //new Orangelight(s_Swerve).schedule();
   }

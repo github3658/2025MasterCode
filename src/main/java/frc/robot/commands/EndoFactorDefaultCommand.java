@@ -3,22 +3,22 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.ButtonPanel;
 import frc.robot.ButtonPanel.Button;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.SameDayDelivery;
-import frc.robot.subsystems.Elevator.Level;
-import frc.robot.subsystems.SameDayDelivery.PivotTarget;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.SameDayDeliverySubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.Level;
+import frc.robot.subsystems.SameDayDeliverySubsystem.PivotTarget;
 
-public class EndEffectorDefault extends Command {
+public class EndoFactorDefaultCommand extends Command {
 
-    private SameDayDelivery s_EndEffector;
+    private SameDayDeliverySubsystem s_EndEffector;
     private ButtonPanel bp_Operator;
-    private Elevator s_Elevator; 
+    private ElevatorSubsystem s_Elevator; 
     // Ideally, we'd only include this subsystem in commands that necessitate reading information from it.
     // Since we're only reading information from it, there should be no conflicts.
 
     private PivotTarget pt_IdealTarget; // Depending on the elevator height, what position should we eject coral?
 
-    public EndEffectorDefault(SameDayDelivery sdd, ButtonPanel bp, Elevator e) {
+    public EndoFactorDefaultCommand(SameDayDeliverySubsystem sdd, ButtonPanel bp, ElevatorSubsystem e) {
         s_EndEffector = sdd;
         bp_Operator = bp;
         s_Elevator = e;
@@ -46,10 +46,10 @@ public class EndEffectorDefault extends Command {
 
         // Pivot Control
         if (bp_Operator.getButtonPressed(Button.ClawPositionAlgae)) {
-            s_EndEffector.setPivot(SameDayDelivery.PivotTarget.AlgaeIntake);
+            s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
         }
         else if (bp_Operator.getButtonPressed(Button.ClawPositionCoral)) {
-            s_EndEffector.setPivot(SameDayDelivery.PivotTarget.CoralIntake);
+            s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.CoralIntake);
         }
 
         // Pivot adjustment
@@ -62,29 +62,29 @@ public class EndEffectorDefault extends Command {
 
         // Intake
         if (bp_Operator.getButtonPressed(Button.AlgaeIn)) {
-            if (s_EndEffector.isPivotTarget(SameDayDelivery.PivotTarget.AlgaeIntake)) {
+            if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake)) {
                 s_EndEffector.intakeAlgae();
             }
             else {
-                s_EndEffector.setPivot(SameDayDelivery.PivotTarget.AlgaeIntake);
+                s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
         else if (bp_Operator.getButtonPressed(Button.CoralIn)) {
-            if (s_EndEffector.isPivotTarget(SameDayDelivery.PivotTarget.CoralIntake)) {
+            if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.CoralIntake)) {
                 s_EndEffector.intakeCoral();
             }
             else {
-                s_EndEffector.setPivot(SameDayDelivery.PivotTarget.AlgaeIntake);
+                s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
 
         // Eject
         if (bp_Operator.getButtonPressed(Button.AlgaeOut)) {
-            if (s_EndEffector.isPivotTarget(SameDayDelivery.PivotTarget.AlgaeIntake)) {
+            if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake)) {
                 s_EndEffector.ejectAlgae();
             }
             else {
-                s_EndEffector.setPivot(SameDayDelivery.PivotTarget.AlgaeIntake);
+                s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
         else if (bp_Operator.getButtonPressed(Button.CoralOut)) {

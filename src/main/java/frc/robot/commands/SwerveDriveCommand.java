@@ -4,10 +4,10 @@ import com.ctre.phoenix6.swerve.*;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.SwerveDrivetrainSubsystem;
 
-public class SwerveDrive extends Command {
-    private final CommandSwerveDrivetrain s_Swerve;
+public class SwerveDriveCommand extends Command {
+    private final SwerveDrivetrainSubsystem s_Swerve;
     private final XboxController xb_Driver;
 
     private final double c_MaxSwerveSpeed = 5.21; // kSpeedAt12VoltsMps desired top speed
@@ -15,7 +15,7 @@ public class SwerveDrive extends Command {
 
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric().withDriveRequestType(com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType.OpenLoopVoltage);
 
-    public SwerveDrive(CommandSwerveDrivetrain s, XboxController xb) {
+    public SwerveDriveCommand(SwerveDrivetrainSubsystem s, XboxController xb) {
         s_Swerve = s;
         xb_Driver = xb;
         addRequirements(s_Swerve);
