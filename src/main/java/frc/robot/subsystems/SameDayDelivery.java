@@ -21,8 +21,8 @@ public class SameDayDelivery extends SubsystemBase {
         }
     }
 
-    private TalonFX m_Pivot = new TalonFX(999, "3658CANivore");
-    private TalonFX m_Intake = new TalonFX(999, "3658CANivore");
+    private TalonFX m_EndoPivot = new TalonFX(31, "3658CANivore"); //Pivot Motor
+    private TalonFX m_EndoDeivery = new TalonFX(32, "3658CANivore"); //Both Endofactors Input & Output
     private CANrange sensor_CANrange = new CANrange(999, "3658CANivore");
     private CANcoder sensor_CANcoder = new CANcoder(999, "3658CANivore");
 

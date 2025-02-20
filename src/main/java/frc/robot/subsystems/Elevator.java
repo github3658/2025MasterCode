@@ -8,6 +8,10 @@ public class Elevator extends SubsystemBase {
     // 3 pre-programmed stages accessible by button panel
     // Adjusts swerve speed for safety
 
+    private TalonFX m_LeftElevatorMotor = new TalonFX(41, "3658CANivore");
+    private TalonFX m_RightElevatorMotor = new TalonFX(42, "3658CANivore");
+
+
     public enum Level {
         Level1(1),
         Level2(2),
