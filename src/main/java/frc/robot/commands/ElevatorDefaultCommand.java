@@ -24,6 +24,9 @@ public class ElevatorDefaultCommand extends Command {
 
     @Override
     public void execute() {
+        //TODO: Before leaving stow we need to make sure the Endofactor is raised to it's safety position. This is to prevent it from crashing into the upper bar
+        //TODO: We need a method to expose the level to the Endofactor. We need to prevent the Endofactor from going below the safety limit if it is not in stow.
+
         if (bp_Operator.getButtonPressed(Button.Stow)) {
             s_Elevator.setLevel(Level.Level1);
         }

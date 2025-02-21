@@ -51,7 +51,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
      * Intake coral.
      */
     public void intakeCoral() {
-
+        //TODO: We will need to disable the player button and take over with a timer once the distance sensor detects coral.
     }
 
      /**
