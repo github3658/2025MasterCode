@@ -32,7 +32,7 @@ public class EndoFactorDefaultCommand extends Command {
 
     @Override
     public void execute() {
-        //TODO: If the elevate is orders to move up from it's store position we need to ensure the Endofactor is up to it's Safety Position.
+        //TODO: If the elevator is ordered to move up from it's stow position we need to ensure the Endofactor is up to it's Safety Position.
         // Depending on elevator position, set the coral eject position.
         pt_IdealTarget = PivotTarget.CoralIntake;
         if (s_Elevator.getTargetLevel() == Level.Level1) {
