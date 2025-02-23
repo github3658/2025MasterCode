@@ -11,6 +11,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     // These values are temporary, and should reflect the values of the CANcoder at these positions in the end.
     public enum PivotTarget {
         CoralIntake(0),
+        SafetyTarget(10),
         Level1(50),
         Level2AndLevel3(100),
         Level4(200),
@@ -26,7 +27,6 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     private TalonFX m_EndoDeivery = new TalonFX(32, "3658CANivore"); //Both Endofactors Input & Output
     private CANrange sensor_CANrange = new CANrange(999, "3658CANivore");
     private CANcoder sensor_CANcoder = new CANcoder(999, "3658CANivore");
-    private final double d_SafetyPosition = 999; //TODO: Get safety position when robot is ready. 
 
     private PivotTarget pt_PivotTarget;
 
@@ -83,7 +83,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     }
 
     public boolean isSafe() {
-        return(getCurrentPosition() == d_SafetyPosition);
+        return(getCurrentPosition() == PivotTarget.SafetyTarget.value);
     }
     
     /**
