@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.subsystems.*; // This imports all of our subsystems.
+import frc.robot.subsystems.SameDayDeliverySubsystem.PivotTarget;
 import frc.robot.ButtonPanel.Button;
 import frc.robot.commands.*; // This imports all of our commands.
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,19 +27,20 @@ public class Robot extends TimedRobot {
 
   // This is the operator's button panel.
   // This is a custom class I made that lets you check for input using a Button enum.
-  //
-  
-  //private ButtonPanel bp_Operator = new ButtonPanel(1);
+  private ButtonPanel bp_Operator = new ButtonPanel(1);
 
   private SwerveDrivetrainSubsystem s_Swerve = TunerConstants.createDrivetrain();
-  //private Elevator s_Elevator = new Elevator();
-  //private SameDayDelivery s_EndEffector = new SameDayDelivery();
+  private ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
+  private SameDayDeliverySubsystem s_EndEffector = new SameDayDeliverySubsystem();
+  private ClimbSubsystem s_ClimbSubsystem = new ClimbSubsystem();
+  private LEDSubsystem s_LED = new LEDSubsystem();
 
   @Override
   public void robotInit() {
     s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, xb_Driver));
-    //s_Elevator.setDefaultCommand(new ElevatorDefault(s_Elevator, bp_Operator));
-    //s_EndEffector.setDefaultCommand(new EndEffectorDefault(s_EndEffector, bp_Operator, s_Elevator));
+    s_Elevator.setDefaultCommand(new ElevatorDefaultCommand(s_Elevator, bp_Operator));
+    s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
+    s_ClimbSubsystem.setDefaultCommand(new ClimbDefaultCommand(s_ClimbSubsystem, bp_Operator));
   }
 
   @Override
@@ -46,6 +48,18 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     SmartDashboard.putNumber("Limelight Target X", LimelightHelpers.getTX(""));
     //SmartDashboard.putBoolean("Stow Button", bp_Operator.getButton(Button.Stow));
+
+    // If the elevator wants to move, take the End Effector out of unsafe positions.
+    if (!s_Elevator.isFinished() && s_EndEffector.isPivotTarget(PivotTarget.CoralIntake)) {
+      s_EndEffector.setPivot(PivotTarget.SafetyTarget);
+    }
+
+    if (s_EndEffector.isFinished() && !s_EndEffector.isPivotTarget(PivotTarget.CoralIntake)) {
+      s_Elevator.setLocked(false);
+    }
+    else {
+      s_Elevator.setLocked(true);
+    }
   }
 
   @Override

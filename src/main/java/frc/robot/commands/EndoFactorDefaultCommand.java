@@ -70,16 +70,17 @@ public class EndoFactorDefaultCommand extends Command {
                 s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
-        else if (bp_Operator.getButtonPressed(Button.CoralIn)) {
+        else if (bp_Operator.getButtonPressed(Button.CoralIn) && !s_EndEffector.isB_IntakeDisabled() && s_Elevator.getElevatorLevel() == Level.Level1) {
             //TODO: Prevent this from working if the distance sensor is detecting coral.
             if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.CoralIntake)) {
                 s_EndEffector.intakeCoral();
+
             }
             else {
                 s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
-
+        s_EndEffector.timerExecute().runIntakeToPose();
         // Eject
         if (bp_Operator.getButtonPressed(Button.AlgaeOut)) {
             if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake)) {
