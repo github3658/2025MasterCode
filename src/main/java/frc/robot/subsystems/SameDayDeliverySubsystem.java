@@ -68,7 +68,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
      * Intake algae.
      */
     public void intakeAlgae() {
-
+        
     }
 
     /**
