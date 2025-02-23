@@ -4,6 +4,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.hardware.CANrange;
 import com.ctre.phoenix6.hardware.CANcoder;
 
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SameDayDeliverySubsystem extends SubsystemBase {
@@ -25,6 +26,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     private TalonFX m_EndoDeivery = new TalonFX(32, "3658CANivore"); //Both Endofactors Input & Output
     private CANrange sensor_CANrange = new CANrange(999, "3658CANivore");
     private CANcoder sensor_CANcoder = new CANcoder(999, "3658CANivore");
+    private final double d_SafetyPosition = 999; //TODO: Get safety position when robot is ready. 
 
     private PivotTarget pt_PivotTarget;
 
@@ -76,6 +78,14 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         pt_PivotTarget.value += offset;
     }
 
+    private double getCurrentPosition() { 
+        return m_EndoPivot.getPosition().getValueAsDouble();
+    }
+
+    public boolean isSafe() {
+        return(getCurrentPosition() == d_SafetyPosition);
+    }
+    
     /**
      * Returns whether the current pivot target is the one provided.
      * @param target A PivotTarget value to check
