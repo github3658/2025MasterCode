@@ -55,10 +55,9 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     }
 
      /**
-     * Eject algae.
+     * Eject algae
      */
     public void ejectAlgae() {
-
     }
 
     /**
