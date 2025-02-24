@@ -26,13 +26,10 @@ public class EndoFactorDefaultCommand extends Command {
     }
 
     @Override
-    public void initialize() {
-
-    }
+    public void initialize() { }
 
     @Override
     public void execute() {
-        //TODO: If the elevator is ordered to move up from it's stow position we need to ensure the Endofactor is up to it's Safety Position.
         // Depending on elevator position, set the coral eject position.
         pt_IdealTarget = PivotTarget.CoralIntake;
         if (s_Elevator.getTargetLevel() == Level.Level1) {
@@ -70,17 +67,18 @@ public class EndoFactorDefaultCommand extends Command {
                 s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
-        else if (bp_Operator.getButtonPressed(Button.CoralIn) && !s_EndEffector.isB_IntakeDisabled() && s_Elevator.getElevatorLevel() == Level.Level1) {
-            //TODO: Prevent this from working if the distance sensor is detecting coral.
+        else if (bp_Operator.getButtonPressed(Button.CoralIn) && !s_EndEffector.getIsIntakeDisabled() && s_Elevator.getElevatorLevel() == Level.Level1) {
+            //TODO: Refactor to if the pivot is positioned then we position it first and the run the intake coral.
             if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.CoralIntake)) {
                 s_EndEffector.intakeCoral();
-
             }
             else {
                 s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
+
         s_EndEffector.timerExecute().runIntakeToPose();
+
         // Eject
         if (bp_Operator.getButtonPressed(Button.AlgaeOut)) {
             if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake)) {

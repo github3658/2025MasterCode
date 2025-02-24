@@ -5,17 +5,159 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.hardware.CANrange;
 
-import java.lang.reflect.Type;
-
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 
-import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Config;
 
 public class SameDayDeliverySubsystem extends SubsystemBase {
-    // These values are temporary, and should reflect the values of the CANcoder at these positions in the end.
+    public SameDayDeliverySubsystem() {
+        pt_PivotTarget = PivotTarget.CoralIntake;
+        setMotorConfig();
+        zeroDeliveryPosition();
+        zeroPivotPosition();
+    }
+
+    private final double d_MotorSpeed = 0.0625;
+    
+    private void setMotorConfig() {
+        TalonFXConfiguration confPivot = new TalonFXConfiguration();
+        confPivot.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        
+        TalonFXConfiguration confDelivery = new TalonFXConfiguration();
+        confDelivery.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        confDelivery.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        m_DeliveryMotor.getConfigurator().apply(confDelivery);
+        m_PivotMotor.getConfigurator().apply(confPivot);
+    }
+
+    //region Delivery
+    //region Properies
+    private final TalonFX m_DeliveryMotor = new TalonFX(Config.kDeliveryMotorId, Config.kCanbus); 
+    private final CANrange s_DeliveryRange = new CANrange(Config.kDeliveryRangeId, Config.kCanbus);
+
+    /** The max range for when we know coral is in the Endofactor. */ 
+    private final double d_CoralDetectionRange = 10.0;
+    private final double d_CoralIntakeTimerDuration = 5.0;
+    /** The number of enoder ticks required to injest the coral from the distance sensor. */
+    private final double d_CoralInTravel = 1000;
+    /** The number of enoder ticks required to eject the coral from when the play presses the button. */
+    private final double d_CoralOutTravel = 1000;
+
+    private final Timer t_CoralIntakeTimer = new Timer();
+    /** If true this prevents the player from ejecting the coral */
+    private boolean b_IsCoralOutputDisabled; 
+    /** If true this prevents the player from intaking the coral */
+    private boolean b_IsCoralIntakeDisabled;
+    private boolean b_IsCoralIntakeTimerEnabled;
+    private boolean b_IsCoralRunningIntakeToPose;
+    private boolean b_IsCoralEjecting;
+    private double d_TargetCoralPosition;
+    //endregion
+
+    //region Methods
+    //region Coral
+    public SameDayDeliverySubsystem intakeCoral() {
+        if (!b_IsCoralIntakeDisabled) {
+            b_IsCoralIntakeDisabled = true; // Prevents the player's button press.
+            b_IsCoralOutputDisabled = true; // Prevents the player's button press.
+            m_DeliveryMotor.set(d_MotorSpeed);
+            t_CoralIntakeTimer.reset();
+            t_CoralIntakeTimer.start();
+            b_IsCoralIntakeTimerEnabled = true; // Will start running the timer method in the command's execute method.
+        }
+
+        return this;
+    }
+
+    public SameDayDeliverySubsystem ejectCoral() {
+        if (!b_IsCoralOutputDisabled) {
+            b_IsCoralOutputDisabled = true;
+            b_IsCoralEjecting = true; 
+            m_DeliveryMotor.set(d_MotorSpeed);
+            d_TargetCoralPosition = getDeliveryPosition() + d_CoralOutTravel;
+        }
+
+        return this;
+    }
+
+    public boolean getIsIntakeDisabled() { 
+        return b_IsCoralIntakeDisabled;
+    }
+
+    public boolean getIsTimerEnabled() {
+        return b_IsCoralIntakeTimerEnabled;
+    }
+
+    private void zeroDeliveryPosition() {
+        m_DeliveryMotor.setPosition(0);
+    }
+
+    public double getDeliveryPosition() {
+        return m_DeliveryMotor.getPosition().getValueAsDouble();
+    }
+
+    public double getDeliveryRange() {
+        return s_DeliveryRange.getDistance().getValueAsDouble();
+    }
+
+    public SameDayDeliverySubsystem timerExecute() {
+        if (b_IsCoralIntakeTimerEnabled) {
+            if (getDeliveryRange() < d_CoralDetectionRange) { 
+                stopTimer();
+                d_TargetCoralPosition = getDeliveryPosition() + d_CoralInTravel;
+                b_IsCoralRunningIntakeToPose = true; // Will start running the runIntakeToPose method in the command's execute method.
+            }
+            else if (t_CoralIntakeTimer.hasElapsed(d_CoralIntakeTimerDuration)) {
+                stopTimer();
+                m_DeliveryMotor.set(0);
+                b_IsCoralIntakeDisabled = false;
+                b_IsCoralOutputDisabled = false;
+            }
+        }
+        return this;
+    }
+
+    private void stopTimer() {
+        t_CoralIntakeTimer.stop();
+        b_IsCoralIntakeTimerEnabled = false; 
+    }
+
+    public SameDayDeliverySubsystem runIntakeToPose() {
+        if (b_IsCoralRunningIntakeToPose || b_IsCoralEjecting) {
+            if (getPivotPosition() >= d_TargetCoralPosition) {
+                m_DeliveryMotor.set(0);
+                if (b_IsCoralRunningIntakeToPose) { 
+                    b_IsCoralOutputDisabled = false; 
+                    b_IsCoralRunningIntakeToPose = false;
+                } else if (b_IsCoralEjecting) {
+                    b_IsCoralIntakeDisabled = false;
+                    b_IsCoralEjecting = false;
+                }
+            }
+        }
+        return this;
+    }
+    //endregion
+
+    //region Algae
+    public void intakeAlgae() { }
+
+    public void ejectAlgae() {
+    }
+    //endregion
+    //endregion
+    //endregion
+
+    //region Pivot
+    //region Properies
+    private final TalonFX m_PivotMotor = new TalonFX(Config.kPivotMotorId, Config.kCanbus); //Pivot Motor
+    private final CANcoder s_PivotEncoder = new CANcoder(Config.kPivotEncoderId, Config.kCanbus);
+
+    // TODO: Change to reflect the values of the CANcoder at these positions in the end.
     public enum PivotTarget {
         CoralIntake(0),
         SafetyTarget(10),
@@ -29,171 +171,34 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
             this.value = value;
         }
     }
-
-    private TalonFX m_EndoPivot = new TalonFX(31, "3658CANivore"); //Pivot Motor
-    private TalonFX m_EndoDeivery = new TalonFX(32, "3658CANivore"); //Both Endofactors Input & Output
-    private CANrange sensor_CANrange = new CANrange(61, "3658CANivore");
-    private CANcoder sensor_CANcoder = new CANcoder(33, "3658CANivore");
-    private boolean b_IntakeDisabled;
-    private final Timer t_IntakeTimer = new Timer();
-    private boolean t_IntakeTimerEnabled;
-    private final double d_IntakeTimerDuration = 5; //TODO: Adjust timer duration.
-    private double d_TargetDeliveryPosition;
-    private boolean b_runningIntakeToPose;
-
-    private final double defaultMotorSpeed = 0.0625; //Default motor speed.
-
-    private boolean b_OutputDisabled; 
-    private boolean b_Ejecting;
-
+    
     private PivotTarget pt_PivotTarget;
+    //endregion
 
-
-    public SameDayDeliverySubsystem() {
-        pt_PivotTarget = PivotTarget.CoralIntake;
-        setMotorConfig();
-        zeroDeliveryPosition();
-        zeroPivotPosition();
+    //region Methods
+    public boolean isSafe() {
+        return(getPivotPosition() == PivotTarget.SafetyTarget.value);
     }
 
-    /**
-     * Sets the delivery system pivot to the PivotTarget provided.
-     * @param target Which PivotTarget to go to
-     */
     public void setPivot(PivotTarget target) {
         pt_PivotTarget = target;
     }
 
-    /**
-     * Intake algae.
-     */
-    public void intakeAlgae() {
-        
-    }
-
-    /**
-     * Intake coral.
-     */
-    public void intakeCoral() {
-        //TODO: We will need to disable the player button and take over with a timer once the distance sensor detects coral.
-        if (b_IntakeDisabled == false) {
-            b_IntakeDisabled = true;
-            b_OutputDisabled = true;
-            m_EndoDeivery.set(defaultMotorSpeed);
-            t_IntakeTimer.reset();
-            t_IntakeTimer.start();
-            t_IntakeTimerEnabled = true;
-        }
-    }
-
-    public boolean isB_IntakeDisabled() { 
-        return b_IntakeDisabled;
-    }
-
-    public boolean isTimerEnabled() {
-        return t_IntakeTimerEnabled;
-        }
-
-    public SameDayDeliverySubsystem timerExecute() {
-        if (t_IntakeTimerEnabled) {
-            if (sensor_CANrange.getDistance().getValueAsDouble() < 10) { //TODO: set distance instead of 10
-                stopTimer();
-                d_TargetDeliveryPosition = m_EndoDeivery.getPosition().getValueAsDouble() + 1000; //TODO: 1000 needs to be tuned to an actual value of encoder.
-                b_runningIntakeToPose = true;
-            }
-            else if (t_IntakeTimer.hasElapsed(d_IntakeTimerDuration)) {
-                stopTimer();
-                m_EndoDeivery.set(0);
-                b_IntakeDisabled = false;
-                b_OutputDisabled = false;
-            }
-        }
-        return this;
-    }
-    
-
-
-    private void stopTimer() {
-        t_IntakeTimer.stop();
-        t_IntakeTimerEnabled = false; 
-    }
-
-    public SameDayDeliverySubsystem runIntakeToPose() {
-        if (b_runningIntakeToPose || b_Ejecting) {
-            if (getPivotPosition() >= d_TargetDeliveryPosition) {
-                m_EndoDeivery.set(0);
-                b_runningIntakeToPose = false; //TODO: Make sure to re-enable the intake when the coral is ejected.
-                b_OutputDisabled = false; 
-            }
-        }
-        return this;
-    }
-
-     /**
-     * Eject algae
-     */
-    public void ejectAlgae() {
-    }
-
-    /**
-     * Eject coral.
-     */
-    public void ejectCoral() {
-        if (!b_OutputDisabled) {
-            b_OutputDisabled = true;
-            b_Ejecting = true; 
-            m_EndoDeivery.set(defaultMotorSpeed);
-            d_TargetDeliveryPosition = getDeliveryPosition() + 1000; //TODO: Get value for output
-        }
-    }
-
-    /**
-     * Adjusts the value of the current PivotTarget manually. This offset persists until the robot is rebooted.
-     * @param offset
-     */
     public void adjustCurrentPivot(double offset) {
         pt_PivotTarget.value += offset;
     }
-
-    private double getPivotPosition() { 
-        return m_EndoPivot.getPosition().getValueAsDouble();
-    }
-
-    private double getDeliveryPosition() {
-        return m_EndoDeivery.getPosition().getValueAsDouble();
-    }
-
-    public boolean isSafe() {
-        return(getPivotPosition() == PivotTarget.SafetyTarget.value);
-    }
-    
-    private void setMotorConfig() {
-        TalonFXConfiguration confPivot = new TalonFXConfiguration();
-        confPivot.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        
-        TalonFXConfiguration confDelivery = new TalonFXConfiguration();
-        confDelivery.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        confDelivery.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-
-
-        m_EndoDeivery.getConfigurator().apply(confDelivery);
-        m_EndoPivot.getConfigurator().apply(confPivot);
-    }
-
-    private void zeroDeliveryPosition() {
-        m_EndoDeivery.setPosition(0);
-    }
     
     private void zeroPivotPosition() {
-        m_EndoPivot.setPosition(0);
+        m_PivotMotor.setPosition(0);
     }
 
-    /**
-     * Returns whether the current pivot target is the one provided.
-     * @param target A PivotTarget value to check
-     * @return Whether the provided value is our current target.
-     */
+    public double getPivotPosition() { 
+        return m_PivotMotor.getPosition().getValueAsDouble();
+    }
+
     public boolean isPivotTarget(PivotTarget target) {
         return pt_PivotTarget == target;
     }
+    //endregion
+    //endregion
 }

@@ -39,7 +39,8 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, xb_Driver));
     s_Elevator.setDefaultCommand(new ElevatorDefaultCommand(s_Elevator, bp_Operator));
-    s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
+    //s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
+    s_EndEffector.setDefaultCommand(new EndoFactorTelemetryCommand(s_EndEffector, bp_Operator, s_Elevator));
     s_ClimbSubsystem.setDefaultCommand(new ClimbDefaultCommand(s_ClimbSubsystem, bp_Operator));
   }
 
