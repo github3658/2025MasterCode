@@ -18,8 +18,8 @@ public class ButtonPanel {
         AlgaeIn(12, 10),
         AlgaeOut(13, 11),
         ShallowClimb(14),
-        DeepClimbGrab(15),
-        DeepClimbClimb(16);
+        DeepClimbExtend(15),
+        DeepClimbRetract(16);
         public final int value;
         public final int indicator;
         Button(int value) {
