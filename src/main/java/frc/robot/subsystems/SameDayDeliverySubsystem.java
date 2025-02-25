@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
 
@@ -24,7 +25,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     
     private void setMotorConfig() {
         TalonFXConfiguration confPivot = new TalonFXConfiguration();
-        confPivot.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        confPivot.MotorOutput.NeutralMode = NeutralModeValue.Coast; //TODO: Turn back to brake
         
         TalonFXConfiguration confDelivery = new TalonFXConfiguration();
         confDelivery.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -159,12 +160,12 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
 
     // TODO: Change to reflect the values of the CANcoder at these positions in the end.
     public enum PivotTarget {
-        CoralIntake(0),
-        SafetyTarget(10),
-        Level1(50),
-        Level2AndLevel3(100),
-        Level4(200),
-        AlgaeIntake(300)
+        CoralIntake(-0.415),
+        SafetyTarget(-0.366),
+        Level1(-0.415),
+        Level2AndLevel3(-0.366),
+        Level4(-0.243),
+        AlgaeIntake(0.128)
         ;
         double value;
         PivotTarget(double value) {
@@ -177,7 +178,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
 
     //region Methods
     public boolean isSafe() {
-        return(getPivotPosition() == PivotTarget.SafetyTarget.value);
+        return(getPivotPosition() >= PivotTarget.SafetyTarget.value);
     }
 
     public void setPivot(PivotTarget target) {
@@ -193,7 +194,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     }
 
     public double getPivotPosition() { 
-        return m_PivotMotor.getPosition().getValueAsDouble();
+        return s_PivotEncoder.getAbsolutePosition(true).getValueAsDouble();
     }
 
     public boolean isPivotTarget(PivotTarget target) {
@@ -201,4 +202,11 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     }
     //endregion
     //endregion
+
+    double counter = 0.0;
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("SubSystemPeriodicCounter", counter++);
+        SmartDashboard.putNumber("SubSystemPeriodicPivot", getPivotPosition());
+    }
 }

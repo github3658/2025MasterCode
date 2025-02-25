@@ -4,12 +4,13 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Config;
 
 public class ClimbSubsystem extends SubsystemBase {
 
     private final double d_ClimbSpeed = 0.0625;
 
-    private TalonFX m_LiftMotor = new TalonFX(51, "3658CANivore");
+    private TalonFX m_LiftMotor = new TalonFX(Config.kLiftMotor, Config.kCanbus);
 
     public ClimbSubsystem() {
         m_LiftMotor.setNeutralMode(NeutralModeValue.Brake);

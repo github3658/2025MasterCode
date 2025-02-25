@@ -32,13 +32,13 @@ public class EndoFactorDefaultCommand extends Command {
     public void execute() {
         // Depending on elevator position, set the coral eject position.
         pt_IdealTarget = PivotTarget.CoralIntake;
-        if (s_Elevator.getTargetLevel() == Level.Level1) {
+        if (s_Elevator.getTargetLevel() == Level.Stow) {
             pt_IdealTarget = PivotTarget.Level1;
         }
-        else if (s_Elevator.getTargetLevel() == Level.Level2 || s_Elevator.getTargetLevel() == Level.Level3) {
+        else if (s_Elevator.getTargetLevel() == Level.Coral1 || s_Elevator.getTargetLevel() == Level.Coral2) {
             pt_IdealTarget = PivotTarget.Level2AndLevel3;
         }
-        else if (s_Elevator.getTargetLevel() == Level.Level4) {
+        else if (s_Elevator.getTargetLevel() == Level.Coral3) {
             pt_IdealTarget = PivotTarget.Level4;
         }
 
@@ -67,7 +67,7 @@ public class EndoFactorDefaultCommand extends Command {
                 s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
-        else if (bp_Operator.getButtonPressed(Button.CoralIn) && !s_EndEffector.getIsIntakeDisabled() && s_Elevator.getElevatorLevel() == Level.Level1) {
+        else if (bp_Operator.getButtonPressed(Button.CoralIn) && !s_EndEffector.getIsIntakeDisabled() && s_Elevator.getElevatorLevel() == Level.Stow) {
             //TODO: Refactor to if the pivot is positioned then we position it first and the run the intake coral.
             if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.CoralIntake)) {
                 s_EndEffector.intakeCoral();

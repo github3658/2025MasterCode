@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Config;
+
 import com.ctre.phoenix.led.CANdle;
 // IMPORTANT: com.ctre.phoenix not resolving is probably a quirk with a VS Code extension. The code builds fine.
 
@@ -45,7 +47,7 @@ public class LEDSubsystem extends SubsystemBase {
     private final int c_LEDCount = 68;
 
     /* CANDLE AND ANIMATIONS */
-    public final CANdle m_CANdle = new CANdle(c_CANDleID, "3658CANivore"); // Ignore errors regarding the CANdle, it errantly thinks that com.ctre.phoenix can't be resolved.
+    public final CANdle m_CANdle = new CANdle(Config.kCandle, Config.kCanbus); // Ignore errors regarding the CANdle, it errantly thinks that com.ctre.phoenix can't be resolved.
 
     /* OTHER VARIABLES */
     private float f_Brightness = 1;
