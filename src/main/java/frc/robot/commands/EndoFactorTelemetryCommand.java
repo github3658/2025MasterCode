@@ -43,4 +43,10 @@ public class EndoFactorTelemetryCommand extends Command {
         SmartDashboard.putBoolean("Shallow Climb", bp_Operator.getButton(Button.ShallowClimb));
         SmartDashboard.putBoolean("Stow", bp_Operator.getButton(Button.Stow));
     }
+
+
+    @Override
+    public boolean isFinished() {
+        return false;
+    }
 }

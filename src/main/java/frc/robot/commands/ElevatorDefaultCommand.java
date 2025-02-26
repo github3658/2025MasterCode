@@ -27,16 +27,16 @@ public class ElevatorDefaultCommand extends Command {
         // Setting the elevator level waits for the end effector to be in a safe position to do so,
         // so it's okay to use the setLevel function like this.
         if (bp_Operator.getButtonPressed(Button.Stow)) {
-            s_Elevator.setLevel(Level.Level1);
+            s_Elevator.setLevel(Level.Stow);
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPosition2)) {
-            s_Elevator.setLevel(Level.Level2);
+            s_Elevator.setLevel(Level.Coral2);
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPosition3)) {
-            s_Elevator.setLevel(Level.Level3);
+            s_Elevator.setLevel(Level.Coral3);
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPosition4)) {
-            s_Elevator.setLevel(Level.Level4);
+            s_Elevator.setLevel(Level.Coral4);
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPositionBarge)) {
             s_Elevator.setLevel(Level.LevelBarge);
