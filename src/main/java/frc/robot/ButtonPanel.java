@@ -11,15 +11,15 @@ public class ButtonPanel {
         ElevatorPositionBarge(5, 5),
         ManualClaw1(6),
         ManualClaw2(7),
-        ClawPositionCoral(8, 6),
-        ClawPositionAlgae(9, 7),
-        CoralIn(10, 8),
-        CoralOut(11, 9),
-        AlgaeIn(12, 10),
-        AlgaeOut(13, 11),
+        ClawPositionCoral(12, 6),
+        ClawPositionAlgae(13, 7),
+        CoralIn(8, 8),
+        CoralOut(9, 9),
+        AlgaeIn(10, 10),
+        AlgaeOut(11, 11),
         ShallowClimb(14),
-        DeepClimbExtend(15),
-        DeepClimbRetract(16);
+        DeepClimbExtend(16),
+        DeepClimbRetract(14);
         public final int value;
         public final int indicator;
         Button(int value) {

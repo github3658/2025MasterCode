@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.subsystems.*; // This imports all of our subsystems.
+import frc.robot.subsystems.ElevatorSubsystem.Level;
 import frc.robot.subsystems.SameDayDeliverySubsystem.PivotTarget;
 import frc.robot.ButtonPanel.Button;
 import frc.robot.commands.*; // This imports all of our commands.
@@ -37,26 +38,32 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    //s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, xb_Driver));
-    //s_Elevator.setDefaultCommand(new ElevatorDefaultCommand(s_Elevator, bp_Operator));
-    //s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
-    s_EndEffector.setDefaultCommand(new EndoFactorTelemetryCommand(s_EndEffector, bp_Operator, s_Elevator));
-    // s_ClimbSubsystem.setDefaultCommand(new ClimbDefaultCommand(s_ClimbSubsystem, bp_Operator));
+    s_Elevator.setLocked(true);
+    // s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, xb_Driver));
+    s_Elevator.setDefaultCommand(new ElevatorDefaultCommand(s_Elevator, bp_Operator));
+    s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
+    //s_EndEffector.setDefaultCommand(new EndoFactorTelemetryCommand(s_EndEffector, bp_Operator, s_Elevator));
+    s_ClimbSubsystem.setDefaultCommand(new ClimbDefaultCommand(s_ClimbSubsystem, bp_Operator));
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    //SmartDashboard.putNumber("Limelight Target X", LimelightHelpers.getTX(""));
+    SmartDashboard.putNumber("Limelight Target X", LimelightHelpers.getTX(""));
     //SmartDashboard.putNumber("PivotEncoder2", s_EndEffector.getPivotPosition());
     //SmartDashboard.putBoolean("Stow Button", bp_Operator.getButton(Button.Stow));
 
     // If the elevator wants to move, take the End Effector out of unsafe positions.
-    // if (!s_Elevator.isFinished() && s_EndEffector.isPivotTarget(PivotTarget.CoralIntake)) {
-    //   s_EndEffector.setPivot(PivotTarget.SafetyTarget);
-    // }
+    if (!s_Elevator.isFinished() && !s_EndEffector.isSafe()) {
+      System.out.println("Move to safety position");
+      s_EndEffector.setPivot(PivotTarget.SafetyTarget);
+    }
+
+    if (s_Elevator.isFinished() && s_Elevator.getElevatorLevel() == Level.Stow && (s_EndEffector.getPivotTarget() != PivotTarget.CoralIntake && s_EndEffector.getPivotTarget() != PivotTarget.AlgaeIntake)) {
+      s_EndEffector.setPivot(PivotTarget.CoralIntake);
+    }
     
-    // if (s_EndEffector.isFinished() && !s_EndEffector.isPivotTarget(PivotTarget.CoralIntake)) {
+    // if (s_EndEffector.isSafe() && !s_EndEffector.isPivotTarget(PivotTarget.CoralIntake)) {
     //   s_Elevator.setLocked(false);
     // }
     // else {
@@ -126,16 +133,16 @@ public class Robot extends TimedRobot {
 double counter = 0.0;
   @Override
   public void teleopPeriodic() {
-    // if (xb_Driver.getStartButtonPressed()) {
-    //   s_Swerve.resetPose(new Pose2d());
-    // }
+    if (xb_Driver.getStartButtonPressed()) {
+      s_Swerve.resetPose(new Pose2d());
+    }
   }
   @Override
   public void teleopExit() {}
 
   @Override
   public void testInit() {
-    // CommandScheduler.getInstance().cancelAll();
+    CommandScheduler.getInstance().cancelAll();
   }
 
   @Override

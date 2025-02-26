@@ -6,6 +6,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
 
@@ -53,7 +54,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private void setElevatorConfig() {
         TalonFXConfiguration cElevatorMotorConfig = new TalonFXConfiguration();
-        cElevatorMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast; //TODO: Turn back to brake
+        cElevatorMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         cElevatorMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
         m_LeftElevatorMotor.getConfigurator().apply(cElevatorMotorConfig);
@@ -61,18 +62,21 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
 
-    // @Override
-    // public void periodic() {
-    //     if (!b_locked && !isFinished()) {
-    //         double speed = (getTargetLevel().value - getEncoderValue()) / 50; // Set speed to encoder difference
-    //         speed = Math.min(Math.max(speed, -0.125), 0.125); // Clamp speed
-    //         m_LeftElevator.set(speed);
-    //     }
-    //     else {
-    //         m_LeftElevator.set(0);
-    //     }
-    // }
-    //TODO: Uncomment later.
+    @Override
+    public void periodic() {
+        if (!b_locked && !isFinished()) {
+            double speed = (getTargetLevel().value - getEncoderValue()) / 200; // Set speed to encoder difference
+            speed = Math.min(Math.max(speed, -0.125), 0.125); // Clamp speed
+            //m_LeftElevator.set(speed);
+            SmartDashboard.putNumber("Elevator - Speed", speed); //Elevator speed in smartdashboard
+        }
+        else {
+            m_LeftElevator.set(0);
+        }
+        SmartDashboard.putBoolean("Elevator - Finished", isFinished());
+        SmartDashboard.putString("Elevator - Target Level", getTargetLevel().name());
+        SmartDashboard.putString("Elevator - Current Level", getElevatorLevel().name());
+    }
 
     /**
      * Given an elevator level, will set the elevator subsystem to that level.

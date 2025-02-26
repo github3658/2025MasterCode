@@ -35,18 +35,20 @@ public class EndoFactorDefaultCommand extends Command {
         if (s_Elevator.getTargetLevel() == Level.Stow) {
             pt_IdealTarget = PivotTarget.Level1;
         }
-        else if (s_Elevator.getTargetLevel() == Level.Coral1 || s_Elevator.getTargetLevel() == Level.Coral2) {
+        else if (s_Elevator.getTargetLevel() == Level.Coral2 || s_Elevator.getTargetLevel() == Level.Coral3) {
             pt_IdealTarget = PivotTarget.Level2AndLevel3;
         }
-        else if (s_Elevator.getTargetLevel() == Level.Coral3) {
+        else if (s_Elevator.getTargetLevel() == Level.Coral4) {
             pt_IdealTarget = PivotTarget.Level4;
         }
 
         // Pivot Control
         if (bp_Operator.getButtonPressed(Button.ClawPositionAlgae)) {
+            System.out.println("AlgaePose");
             s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
         }
         else if (bp_Operator.getButtonPressed(Button.ClawPositionCoral)) {
+            System.out.println("CoralPose");
             s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.CoralIntake);
         }
 
@@ -60,35 +62,36 @@ public class EndoFactorDefaultCommand extends Command {
 
         // Intake
         if (bp_Operator.getButtonPressed(Button.AlgaeIn)) {
+            System.out.println("AlgaeIn");
             if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake)) {
-                s_EndEffector.intakeAlgae();
+                s_EndEffector.intakeAlgae(); // TODO
             }
             else {
                 s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
         else if (bp_Operator.getButtonPressed(Button.CoralIn) && !s_EndEffector.getIsIntakeDisabled() && s_Elevator.getElevatorLevel() == Level.Stow) {
+            System.out.println("Coral In");
             //TODO: Refactor to if the pivot is positioned then we position it first and the run the intake coral.
-            if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.CoralIntake)) {
-                s_EndEffector.intakeCoral();
-            }
-            else {
-                s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
-            }
+            s_EndEffector.intakeCoral();
         }
 
         s_EndEffector.timerExecute().runIntakeToPose();
+        s_EndEffector.runPivotToPose(s_EndEffector.getPivotTarget());
 
         // Eject
         if (bp_Operator.getButtonPressed(Button.AlgaeOut)) {
+            System.out.println("Algae Out");
             if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake)) {
-                s_EndEffector.ejectAlgae();
+                s_EndEffector.ejectAlgae(); // TODO
             }
             else {
                 s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
             }
         }
         else if (bp_Operator.getButtonPressed(Button.CoralOut)) {
+            System.out.println("Coral Out");
+            // TODO: refactor this so it doesn't require two button presses.
             if (s_EndEffector.isPivotTarget(pt_IdealTarget)) {
                 s_EndEffector.ejectCoral();
             }

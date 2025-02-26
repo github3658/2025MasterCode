@@ -30,13 +30,13 @@ public class ElevatorDefaultCommand extends Command {
             s_Elevator.setLevel(Level.Stow);
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPosition2)) {
-            s_Elevator.setLevel(Level.Coral1);
-        }
-        else if (bp_Operator.getButtonPressed(Button.ElevatorPosition3)) {
             s_Elevator.setLevel(Level.Coral2);
         }
-        else if (bp_Operator.getButtonPressed(Button.ElevatorPosition4)) {
+        else if (bp_Operator.getButtonPressed(Button.ElevatorPosition3)) {
             s_Elevator.setLevel(Level.Coral3);
+        }
+        else if (bp_Operator.getButtonPressed(Button.ElevatorPosition4)) {
+            s_Elevator.setLevel(Level.Coral4);
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPositionBarge)) {
             s_Elevator.setLevel(Level.LevelBarge);

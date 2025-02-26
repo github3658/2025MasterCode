@@ -21,11 +21,12 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         zeroPivotPosition();
     }
 
-    private final double d_MotorSpeed = 0.0625;
+    private final double d_IntakeMotorSpeed = 0.125;
+    private final double d_PivotMotorSpeed = 0.0625;
     
     private void setMotorConfig() {
         TalonFXConfiguration confPivot = new TalonFXConfiguration();
-        confPivot.MotorOutput.NeutralMode = NeutralModeValue.Coast; //TODO: Turn back to brake
+        confPivot.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         
         TalonFXConfiguration confDelivery = new TalonFXConfiguration();
         confDelivery.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -41,12 +42,13 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     private final CANrange s_DeliveryRange = new CANrange(Config.kDeliveryRangeId, Config.kCanbus);
 
     /** The max range for when we know coral is in the Endofactor. */ 
-    private final double d_CoralDetectionRange = 10.0;
+    private final double d_CoralDetectionRange = 0.03;
+    private final int i_CoralDetectionSamples = 3;
     private final double d_CoralIntakeTimerDuration = 5.0;
     /** The number of enoder ticks required to injest the coral from the distance sensor. */
-    private final double d_CoralInTravel = 1000;
+    private final double d_CoralInTravel = 1.5;
     /** The number of enoder ticks required to eject the coral from when the play presses the button. */
-    private final double d_CoralOutTravel = 1000;
+    private final double d_CoralOutTravel = 7.5;
 
     private final Timer t_CoralIntakeTimer = new Timer();
     /** If true this prevents the player from ejecting the coral */
@@ -57,15 +59,18 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     private boolean b_IsCoralRunningIntakeToPose;
     private boolean b_IsCoralEjecting;
     private double d_TargetCoralPosition;
+
+    private int i_SuccessfulCoralDetectionSamples;
     //endregion
 
     //region Methods
     //region Coral
     public SameDayDeliverySubsystem intakeCoral() {
         if (!b_IsCoralIntakeDisabled) {
+            i_SuccessfulCoralDetectionSamples = 0;
             b_IsCoralIntakeDisabled = true; // Prevents the player's button press.
             b_IsCoralOutputDisabled = true; // Prevents the player's button press.
-            m_DeliveryMotor.set(d_MotorSpeed);
+            m_DeliveryMotor.set(d_IntakeMotorSpeed);
             t_CoralIntakeTimer.reset();
             t_CoralIntakeTimer.start();
             b_IsCoralIntakeTimerEnabled = true; // Will start running the timer method in the command's execute method.
@@ -78,8 +83,9 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         if (!b_IsCoralOutputDisabled) {
             b_IsCoralOutputDisabled = true;
             b_IsCoralEjecting = true; 
-            m_DeliveryMotor.set(d_MotorSpeed);
+            m_DeliveryMotor.set(d_IntakeMotorSpeed);
             d_TargetCoralPosition = getDeliveryPosition() + d_CoralOutTravel;
+            i_SuccessfulCoralDetectionSamples = 0;
         }
 
         return this;
@@ -108,28 +114,40 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     public SameDayDeliverySubsystem timerExecute() {
         if (b_IsCoralIntakeTimerEnabled) {
             if (getDeliveryRange() < d_CoralDetectionRange) { 
-                stopTimer();
-                d_TargetCoralPosition = getDeliveryPosition() + d_CoralInTravel;
-                b_IsCoralRunningIntakeToPose = true; // Will start running the runIntakeToPose method in the command's execute method.
+                i_SuccessfulCoralDetectionSamples++;
+                if (i_SuccessfulCoralDetectionSamples > i_CoralDetectionSamples) {
+                    System.out.println("DETECT CORAL");
+                    stopTimer();
+                    d_TargetCoralPosition = getDeliveryPosition() + d_CoralInTravel;
+                    b_IsCoralRunningIntakeToPose = true; // Will start running the runIntakeToPose method in the command's execute method.
+                }
             }
             else if (t_CoralIntakeTimer.hasElapsed(d_CoralIntakeTimerDuration)) {
+                System.out.println("TIMEOUT");
                 stopTimer();
                 m_DeliveryMotor.set(0);
                 b_IsCoralIntakeDisabled = false;
                 b_IsCoralOutputDisabled = false;
+            }
+            else {
+                i_SuccessfulCoralDetectionSamples = 0;
             }
         }
         return this;
     }
 
     private void stopTimer() {
+        System.out.println("STOP TIMER");
         t_CoralIntakeTimer.stop();
         b_IsCoralIntakeTimerEnabled = false; 
     }
 
     public SameDayDeliverySubsystem runIntakeToPose() {
+        SmartDashboard.putNumber("INTAKE - POSITION", getDeliveryPosition());
+        SmartDashboard.putNumber("INTAKE - TARGET", d_TargetCoralPosition);
         if (b_IsCoralRunningIntakeToPose || b_IsCoralEjecting) {
-            if (getPivotPosition() >= d_TargetCoralPosition) {
+            if (getDeliveryPosition() >= d_TargetCoralPosition) {
+                System.out.println("REACHED TARGET");
                 m_DeliveryMotor.set(0);
                 if (b_IsCoralRunningIntakeToPose) { 
                     b_IsCoralOutputDisabled = false; 
@@ -177,16 +195,26 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     //endregion
 
     //region Methods
+public void runPivotToPose(PivotTarget target) {
+    double d_CurrentPose = getPivotPosition();
+
+    double speed = Math.min(Math.max((target.value - d_CurrentPose) * 75, -1), 1);
+
+    m_PivotMotor.set(speed * d_PivotMotorSpeed);
+}
+
     public boolean isSafe() {
-        return(getPivotPosition() >= PivotTarget.SafetyTarget.value);
+        return(getPivotPosition() >= PivotTarget.SafetyTarget.value - 0.004);
     }
 
     public void setPivot(PivotTarget target) {
+        System.out.println("Set pivot!");
         pt_PivotTarget = target;
     }
 
     public void adjustCurrentPivot(double offset) {
         pt_PivotTarget.value += offset;
+        pt_PivotTarget.value = Math.max(pt_PivotTarget.value, -0.415);
     }
     
     private void zeroPivotPosition() {
@@ -200,13 +228,18 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     public boolean isPivotTarget(PivotTarget target) {
         return pt_PivotTarget == target;
     }
+
+    public PivotTarget getPivotTarget() {
+        return pt_PivotTarget;
+    }
     //endregion
     //endregion
 
-    double counter = 0.0;
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("SubSystemPeriodicCounter", counter++);
-        SmartDashboard.putNumber("SubSystemPeriodicPivot", getPivotPosition());
+        SmartDashboard.putNumber("Endofactor - current position", getPivotPosition());
+        SmartDashboard.putNumber("Endofactor - target position", pt_PivotTarget.value);
+        SmartDashboard.putBoolean("Endofactor - is safe?", isSafe());
+        //runPivotToPose(pt_PivotTarget);
     }
 }
