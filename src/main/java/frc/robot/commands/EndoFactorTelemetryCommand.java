@@ -40,7 +40,7 @@ public class EndoFactorTelemetryCommand extends Command {
         SmartDashboard.putBoolean("Elevator Position Barge", bp_Operator.getButton(Button.ElevatorPositionBarge));
         SmartDashboard.putBoolean("Manual Claw 1", bp_Operator.getButton(Button.ManualClaw1));
         SmartDashboard.putBoolean("Manual Claw 2", bp_Operator.getButton(Button.ManualClaw2));
-        SmartDashboard.putBoolean("Shallow Climb", bp_Operator.getButton(Button.ShallowClimb));
+        //SmartDashboard.putBoolean("Shallow Climb", bp_Operator.getButton(Button.ShallowClimb));
         SmartDashboard.putBoolean("Stow", bp_Operator.getButton(Button.Stow));
     }
 

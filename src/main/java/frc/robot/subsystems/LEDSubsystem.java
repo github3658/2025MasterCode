@@ -43,8 +43,8 @@ public class LEDSubsystem extends SubsystemBase {
     private Pattern e_PatternTarget;
 
     /* CONSTANTS (prefix: c) */
-    private final int c_CANDleID = 60;
-    private final int c_LEDCount = 68;
+    private final int c_CANDleID = Config.kCandle;
+    private final int c_LEDCount = Config.kLEDCount;
 
     /* CANDLE AND ANIMATIONS */
     public final CANdle m_CANdle = new CANdle(Config.kCandle, Config.kCanbus); // Ignore errors regarding the CANdle, it errantly thinks that com.ctre.phoenix can't be resolved.

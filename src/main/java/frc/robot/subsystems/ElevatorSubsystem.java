@@ -6,6 +6,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
@@ -15,15 +17,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     // 3 pre-programmed stages accessible by button panel
     // Adjusts swerve speed for safety
 
-    private TalonFX m_LeftElevatorMotor = new TalonFX(41, Config.kCanbus);
-    private TalonFX m_RightElevatorMotor = new TalonFX(42, Config.kCanbus);
+    private TalonFX m_LeftElevatorMotor = new TalonFX(Config.kLeftElevatorMotor, Config.kCanbus);
+    private TalonFX m_RightElevatorMotor = new TalonFX(Config.kRightElevatorMotor, Config.kCanbus);
+    private DigitalInput dio_LimitSwitch = new DigitalInput(Config.kLimitSwitch);
 
 
     public enum Level {
         Stow(0),
         Coral1(0),
-        Coral2(12),
-        Coral3(50),
+        Coral2(16),
+        Coral3(52),
         Coral4(124),
         Algea1(54),
         Algea2(87),
@@ -34,10 +37,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
     }
 
-    private final double c_AcceptableEncoderRange = 10;
-
-    private TalonFX m_LeftElevator = new TalonFX(Config.kLeftElevatorMotor, Config.kCanbus);
-    private TalonFX m_RightElevator = new TalonFX(Config.kRightElevatorMotor, Config.kCanbus);
+    private final double c_AcceptableEncoderRange = 0.1;
 
     private boolean b_locked;
     private Level l_TargetLevel = Level.Stow;
@@ -46,10 +46,10 @@ public class ElevatorSubsystem extends SubsystemBase {
      * Constructs the Elevator Subsystem
      */
     public ElevatorSubsystem() {
-        m_LeftElevator.setPosition(0);
-        m_RightElevator.setPosition(0);
+        m_LeftElevatorMotor.setPosition(0);
+        m_RightElevatorMotor.setPosition(0);
         setElevatorConfig();
-        //m_RightElevator.setControl(new Follower(Config.kLeftElevatorMotor, true)); TODO: Uncomment this when done with getting encoder positions.
+        //m_RightElevatorMotor.setControl(new Follower(Config.kLeftElevatorMotor, true));
     }
 
     private void setElevatorConfig() {
@@ -61,21 +61,35 @@ public class ElevatorSubsystem extends SubsystemBase {
         m_RightElevatorMotor.getConfigurator().apply(cElevatorMotorConfig);
     }
 
+    private void Honk() {
+       // m_LeftElevatorMotor.setControl()
+    }
+
 
     @Override
     public void periodic() {
-        if (!b_locked && !isFinished()) {
-            double speed = (getTargetLevel().value - getEncoderValue()) / 200; // Set speed to encoder difference
-            speed = Math.min(Math.max(speed, -0.125), 0.125); // Clamp speed
-            //m_LeftElevator.set(speed);
+        if (!b_locked) {
+            double speed = (getTargetLevel().value - getEncoderValue()) * 0.05; // Set speed to encoder difference
+            speed = Math.min(Math.max(speed, -0.75), 0.75); // Clamp speed
+            if (!dio_LimitSwitch.get()) {
+                m_LeftElevatorMotor.set(0);
+                m_RightElevatorMotor.set(0);
+            }
+            else {
+                m_LeftElevatorMotor.set(speed);
+                m_RightElevatorMotor.set(speed);
+            }
             SmartDashboard.putNumber("Elevator - Speed", speed); //Elevator speed in smartdashboard
         }
         else {
-            m_LeftElevator.set(0);
+            m_LeftElevatorMotor.set(0);
+            SmartDashboard.putNumber("Elevator - Speed", 0); //Elevator speed in smartdashboard
         }
         SmartDashboard.putBoolean("Elevator - Finished", isFinished());
-        SmartDashboard.putString("Elevator - Target Level", getTargetLevel().name());
-        SmartDashboard.putString("Elevator - Current Level", getElevatorLevel().name());
+        SmartDashboard.putBoolean("Elevator - Locked", getLocked());
+        SmartDashboard.putNumber("Elevator - Level TARGET", getTargetLevel().value);
+        SmartDashboard.putNumber("Elevator - Level CURRENT", getEncoderValue());
+        SmartDashboard.putBoolean("Elevator - Limit Switch", dio_LimitSwitch.get());
     }
 
     /**
@@ -91,7 +105,7 @@ public class ElevatorSubsystem extends SubsystemBase {
      * @return
      */
     public double getEncoderValue() {
-        return m_LeftElevator.getPosition().getValueAsDouble();
+        return m_LeftElevatorMotor.getPosition().getValueAsDouble();
     }
 
     /**

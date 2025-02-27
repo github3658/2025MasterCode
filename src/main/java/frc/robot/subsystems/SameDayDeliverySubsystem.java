@@ -22,7 +22,19 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     }
 
     private final double d_IntakeMotorSpeed = 0.125;
+    public enum EjectSpeed {
+        Level1(0.3),
+        Level2(0.3),
+        Level3(0.3),
+        Level4(0.3);
+        double value;
+        private EjectSpeed(double value) {
+            this.value = value;
+        }
+    }
+    private EjectSpeed es_EjectSpeed = EjectSpeed.Level1;
     private final double d_PivotMotorSpeed = 0.0625;
+    private boolean b_hasCoral;
     
     private void setMotorConfig() {
         TalonFXConfiguration confPivot = new TalonFXConfiguration();
@@ -42,11 +54,11 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     private final CANrange s_DeliveryRange = new CANrange(Config.kDeliveryRangeId, Config.kCanbus);
 
     /** The max range for when we know coral is in the Endofactor. */ 
-    private final double d_CoralDetectionRange = 0.03;
+    private final double d_CoralDetectionRange = 0.04;
     private final int i_CoralDetectionSamples = 3;
     private final double d_CoralIntakeTimerDuration = 5.0;
     /** The number of enoder ticks required to injest the coral from the distance sensor. */
-    private final double d_CoralInTravel = 1.5;
+    private final double d_CoralInTravel = 2.25;
     /** The number of enoder ticks required to eject the coral from when the play presses the button. */
     private final double d_CoralOutTravel = 7.5;
 
@@ -83,7 +95,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         if (!b_IsCoralOutputDisabled) {
             b_IsCoralOutputDisabled = true;
             b_IsCoralEjecting = true; 
-            m_DeliveryMotor.set(d_IntakeMotorSpeed);
+            m_DeliveryMotor.set(es_EjectSpeed.value);
             d_TargetCoralPosition = getDeliveryPosition() + d_CoralOutTravel;
             i_SuccessfulCoralDetectionSamples = 0;
         }
@@ -93,6 +105,10 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
 
     public boolean getIsIntakeDisabled() { 
         return b_IsCoralIntakeDisabled;
+    }
+
+    public boolean getIsOutputDisabled() { 
+        return b_IsCoralOutputDisabled;
     }
 
     public boolean getIsTimerEnabled() {
@@ -113,14 +129,11 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
 
     public SameDayDeliverySubsystem timerExecute() {
         if (b_IsCoralIntakeTimerEnabled) {
-            if (getDeliveryRange() < d_CoralDetectionRange) { 
-                i_SuccessfulCoralDetectionSamples++;
-                if (i_SuccessfulCoralDetectionSamples > i_CoralDetectionSamples) {
-                    System.out.println("DETECT CORAL");
-                    stopTimer();
-                    d_TargetCoralPosition = getDeliveryPosition() + d_CoralInTravel;
-                    b_IsCoralRunningIntakeToPose = true; // Will start running the runIntakeToPose method in the command's execute method.
-                }
+            if (hasCoral()) {
+                System.out.println("DETECT CORAL");
+                stopTimer();
+                d_TargetCoralPosition = getDeliveryPosition() + d_CoralInTravel;
+                b_IsCoralRunningIntakeToPose = true; // Will start running the runIntakeToPose method in the command's execute method.
             }
             else if (t_CoralIntakeTimer.hasElapsed(d_CoralIntakeTimerDuration)) {
                 System.out.println("TIMEOUT");
@@ -128,9 +141,6 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
                 m_DeliveryMotor.set(0);
                 b_IsCoralIntakeDisabled = false;
                 b_IsCoralOutputDisabled = false;
-            }
-            else {
-                i_SuccessfulCoralDetectionSamples = 0;
             }
         }
         return this;
@@ -163,9 +173,25 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     //endregion
 
     //region Algae
-    public void intakeAlgae() { }
+    public void intakeAlgae() {
+        m_DeliveryMotor.set(-d_IntakeMotorSpeed);
+    }
 
     public void ejectAlgae() {
+        m_DeliveryMotor.set(d_IntakeMotorSpeed);
+    }
+
+    public void stopAlgaeDelivery() {
+        m_DeliveryMotor.set(0);
+    }
+
+    public boolean canGoToCoralPos() {
+        return b_canGoToCoralPos;
+    }
+
+    boolean b_canGoToCoralPos = true;
+    public void canGoToCoralPos(boolean allowed) {
+        b_canGoToCoralPos = allowed;
     }
     //endregion
     //endregion
@@ -207,6 +233,10 @@ public void runPivotToPose(PivotTarget target) {
         return(getPivotPosition() >= PivotTarget.SafetyTarget.value - 0.004);
     }
 
+    public boolean isFinished() {
+        return(getPivotPosition() >= getPivotTarget().value - 0.004 && getPivotPosition() <= getPivotTarget().value + 0.004);
+    }
+
     public void setPivot(PivotTarget target) {
         System.out.println("Set pivot!");
         pt_PivotTarget = target;
@@ -232,6 +262,14 @@ public void runPivotToPose(PivotTarget target) {
     public PivotTarget getPivotTarget() {
         return pt_PivotTarget;
     }
+
+    public boolean hasCoral() {
+        return b_hasCoral;
+    }
+
+    public void setEjectSpeed(EjectSpeed es) {
+        es_EjectSpeed = es;
+    }
     //endregion
     //endregion
 
@@ -239,7 +277,22 @@ public void runPivotToPose(PivotTarget target) {
     public void periodic() {
         SmartDashboard.putNumber("Endofactor - current position", getPivotPosition());
         SmartDashboard.putNumber("Endofactor - target position", pt_PivotTarget.value);
+        SmartDashboard.putNumber("Endofactor - dt range", getDeliveryRange());
+        SmartDashboard.putNumber("Endofactor - samples", i_SuccessfulCoralDetectionSamples);
         SmartDashboard.putBoolean("Endofactor - is safe?", isSafe());
+        SmartDashboard.putBoolean("Endofactor - has coral?", hasCoral());
         //runPivotToPose(pt_PivotTarget);
+        if (getDeliveryRange() < d_CoralDetectionRange) { 
+            i_SuccessfulCoralDetectionSamples++;
+            if (i_SuccessfulCoralDetectionSamples > i_CoralDetectionSamples) {
+                b_hasCoral = true;
+            }
+        }
+        else {
+            i_SuccessfulCoralDetectionSamples = 0;
+            b_hasCoral = false;
+        }
+        b_IsCoralOutputDisabled = !b_hasCoral;
+        b_IsCoralIntakeDisabled = b_hasCoral;
     }
 }

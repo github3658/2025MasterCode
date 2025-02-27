@@ -38,13 +38,15 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    s_Elevator.setLocked(true);
-    // s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, xb_Driver));
-    s_Elevator.setDefaultCommand(new ElevatorDefaultCommand(s_Elevator, bp_Operator));
+    s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, s_Elevator, xb_Driver));
+    s_Elevator.setDefaultCommand(new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector));
     s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
-    //s_EndEffector.setDefaultCommand(new EndoFactorTelemetryCommand(s_EndEffector, bp_Operator, s_Elevator));
     s_ClimbSubsystem.setDefaultCommand(new ClimbDefaultCommand(s_ClimbSubsystem, bp_Operator));
+    s_Elevator.setLocked(true);
   }
+
+  int test;
+  boolean test2;
 
   @Override
   public void robotPeriodic() {
@@ -63,12 +65,14 @@ public class Robot extends TimedRobot {
       s_EndEffector.setPivot(PivotTarget.CoralIntake);
     }
     
-    // if (s_EndEffector.isSafe() && !s_EndEffector.isPivotTarget(PivotTarget.CoralIntake)) {
-    //   s_Elevator.setLocked(false);
-    // }
-    // else {
-    //   s_Elevator.setLocked(true);
-    // }
+    if (s_Elevator.getLocked() && s_EndEffector.isSafe() && !s_EndEffector.isPivotTarget(PivotTarget.CoralIntake)) {
+      System.out.println("Unlock Elevator");
+      s_Elevator.setLocked(false);
+    }
+    else if (!s_Elevator.getLocked() && !s_EndEffector.isSafe()) {
+      System.out.println("Lock Elevator");
+      s_Elevator.setLocked(true);
+    }
   }
 
   @Override

@@ -17,7 +17,7 @@ public class ButtonPanel {
         CoralOut(9, 9),
         AlgaeIn(10, 10),
         AlgaeOut(11, 11),
-        ShallowClimb(14),
+        HONK(15),
         DeepClimbExtend(16),
         DeepClimbRetract(14);
         public final int value;
@@ -54,5 +54,9 @@ public class ButtonPanel {
      */
     public boolean getButtonPressed(Button button) {
         return button_panel.getRawButtonPressed(button.value);
+    }
+
+    public void setIndicatorLight(Button button, boolean on) {
+        button_panel.setOutput(button.indicator, on);
     }
 }
