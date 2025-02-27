@@ -4,6 +4,7 @@ public class Config {
     public static final String kCanbus = "3658";
     public static final int kPigeon = 13;
     public static final int kCandle = 60;
+    public static final int kLEDCount = 68;
     //region Swerve
     public static final int kBackLeftDriveMotor = 1;
     public static final int kBackLeftAngleMotor = 2;
@@ -22,6 +23,7 @@ public class Config {
     //region Elevator
     public static final int kLeftElevatorMotor = 41;
     public static final int kRightElevatorMotor = 42;
+    public static final int kLimitSwitch = 0;
     //endregion
 
     //region Climb
