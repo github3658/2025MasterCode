@@ -1,10 +1,9 @@
 package frc.robot.commands;
 
-import frc.robot.ButtonPanel;
-import frc.robot.ButtonPanel.Button;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.ButtonPanel;
 import frc.robot.subsystems.ClimbSubsystem;
+import frc.robot.utility.ButtonPanel;
+import frc.robot.utility.ButtonPanel.Button;
 
 public class ClimbDefaultCommand extends Command {
     private ClimbSubsystem s_Climb;

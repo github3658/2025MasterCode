@@ -1,20 +1,20 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.ButtonPanel;
-import frc.robot.ButtonPanel.Button;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.SameDayDeliverySubsystem;
+import frc.robot.subsystems.EndoFactorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.Level;
-import frc.robot.subsystems.SameDayDeliverySubsystem.PivotTarget;
+import frc.robot.subsystems.EndoFactorSubsystem.PivotTarget;
+import frc.robot.utility.ButtonPanel;
+import frc.robot.utility.ButtonPanel.Button;
 
 public class ElevatorDefaultCommand extends Command {
 
     private ElevatorSubsystem s_Elevator;
-    private SameDayDeliverySubsystem s_EndEffector;
+    private EndoFactorSubsystem s_EndEffector;
     private ButtonPanel bp_Operator;
 
-    public ElevatorDefaultCommand(ElevatorSubsystem e, ButtonPanel bp, SameDayDeliverySubsystem s) {
+    public ElevatorDefaultCommand(ElevatorSubsystem e, ButtonPanel bp, EndoFactorSubsystem s) {
         s_Elevator = e;
         bp_Operator = bp;
         s_EndEffector = s;

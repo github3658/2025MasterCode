@@ -6,8 +6,10 @@ package frc.robot;
 
 import frc.robot.subsystems.*; // This imports all of our subsystems.
 import frc.robot.subsystems.ElevatorSubsystem.Level;
-import frc.robot.subsystems.SameDayDeliverySubsystem.PivotTarget;
-import frc.robot.ButtonPanel.Button;
+import frc.robot.subsystems.EndoFactorSubsystem.PivotTarget;
+import frc.robot.utility.ButtonPanel;
+import frc.robot.utility.LimelightHelpers;
+import frc.robot.utility.ButtonPanel.Button;
 import frc.robot.commands.*; // This imports all of our commands.
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -32,7 +34,7 @@ public class Robot extends TimedRobot {
 
   private SwerveDrivetrainSubsystem s_Swerve = TunerConstants.createDrivetrain();
   private ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
-  private SameDayDeliverySubsystem s_EndEffector = new SameDayDeliverySubsystem();
+  private EndoFactorSubsystem s_EndEffector = new EndoFactorSubsystem();
   private ClimbSubsystem s_ClimbSubsystem = new ClimbSubsystem();
   private LEDSubsystem s_LED = new LEDSubsystem();
 

@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
 
-public class SameDayDeliverySubsystem extends SubsystemBase {
-    public SameDayDeliverySubsystem() {
+public class EndoFactorSubsystem extends SubsystemBase {
+    public EndoFactorSubsystem() {
         pt_PivotTarget = PivotTarget.CoralIntake;
         setMotorConfig();
         zeroDeliveryPosition();
@@ -77,7 +77,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
 
     //region Methods
     //region Coral
-    public SameDayDeliverySubsystem intakeCoral() {
+    public EndoFactorSubsystem intakeCoral() {
         if (!b_IsCoralIntakeDisabled) {
             i_SuccessfulCoralDetectionSamples = 0;
             b_IsCoralIntakeDisabled = true; // Prevents the player's button press.
@@ -91,7 +91,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         return this;
     }
 
-    public SameDayDeliverySubsystem ejectCoral() {
+    public EndoFactorSubsystem ejectCoral() {
         if (!b_IsCoralOutputDisabled) {
             b_IsCoralOutputDisabled = true;
             b_IsCoralEjecting = true; 
@@ -127,7 +127,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         return s_DeliveryRange.getDistance().getValueAsDouble();
     }
 
-    public SameDayDeliverySubsystem timerExecute() {
+    public EndoFactorSubsystem timerExecute() {
         if (b_IsCoralIntakeTimerEnabled) {
             if (hasCoral()) {
                 System.out.println("DETECT CORAL");
@@ -152,7 +152,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         b_IsCoralIntakeTimerEnabled = false; 
     }
 
-    public SameDayDeliverySubsystem runIntakeToPose() {
+    public EndoFactorSubsystem runIntakeToPose() {
         SmartDashboard.putNumber("INTAKE - POSITION", getDeliveryPosition());
         SmartDashboard.putNumber("INTAKE - TARGET", d_TargetCoralPosition);
         if (b_IsCoralRunningIntakeToPose || b_IsCoralEjecting) {
@@ -202,7 +202,6 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     private final TalonFX m_PivotMotor = new TalonFX(Config.kPivotMotorId, Config.kCanbus); //Pivot Motor
     private final CANcoder s_PivotEncoder = new CANcoder(Config.kPivotEncoderId, Config.kCanbus);
 
-    // TODO: Change to reflect the values of the CANcoder at these positions in the end.
     public enum PivotTarget {
         CoralIntake(-0.415),
         SafetyTarget(-0.366),

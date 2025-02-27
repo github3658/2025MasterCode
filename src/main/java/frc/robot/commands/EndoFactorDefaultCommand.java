@@ -1,17 +1,17 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.ButtonPanel;
-import frc.robot.ButtonPanel.Button;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.SameDayDeliverySubsystem;
+import frc.robot.subsystems.EndoFactorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.Level;
-import frc.robot.subsystems.SameDayDeliverySubsystem.EjectSpeed;
-import frc.robot.subsystems.SameDayDeliverySubsystem.PivotTarget;
+import frc.robot.subsystems.EndoFactorSubsystem.EjectSpeed;
+import frc.robot.subsystems.EndoFactorSubsystem.PivotTarget;
+import frc.robot.utility.ButtonPanel;
+import frc.robot.utility.ButtonPanel.Button;
 
 public class EndoFactorDefaultCommand extends Command {
 
-    private SameDayDeliverySubsystem s_EndEffector;
+    private EndoFactorSubsystem s_EndEffector;
     private ButtonPanel bp_Operator;
     private ElevatorSubsystem s_Elevator; 
     // Ideally, we'd only include this subsystem in commands that necessitate reading information from it.
@@ -21,7 +21,7 @@ public class EndoFactorDefaultCommand extends Command {
     private boolean b_LightFlash;
     private int i_LightTimer;
 
-    public EndoFactorDefaultCommand(SameDayDeliverySubsystem sdd, ButtonPanel bp, ElevatorSubsystem e) {
+    public EndoFactorDefaultCommand(EndoFactorSubsystem sdd, ButtonPanel bp, ElevatorSubsystem e) {
         s_EndEffector = sdd;
         bp_Operator = bp;
         s_Elevator = e;
@@ -56,13 +56,13 @@ public class EndoFactorDefaultCommand extends Command {
         // Pivot Control
         if (bp_Operator.getButtonPressed(Button.ClawPositionAlgae)) {
             System.out.println("AlgaePose");
-            s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
+            s_EndEffector.setPivot(EndoFactorSubsystem.PivotTarget.AlgaeIntake);
             s_EndEffector.canGoToCoralPos(false);
         }
         else if (bp_Operator.getButtonPressed(Button.ClawPositionCoral)) {
             System.out.println("CoralPose");
             if (s_EndEffector.canGoToCoralPos()) {
-                s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.CoralIntake);
+                s_EndEffector.setPivot(EndoFactorSubsystem.PivotTarget.CoralIntake);
             }
         }
 
@@ -77,11 +77,11 @@ public class EndoFactorDefaultCommand extends Command {
         // Intake
         if (bp_Operator.getButton(Button.AlgaeIn)) {
             System.out.println("AlgaeIn");
-            if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake)) {
-                s_EndEffector.intakeAlgae(); // TODO
+            if (s_EndEffector.isPivotTarget(EndoFactorSubsystem.PivotTarget.AlgaeIntake)) {
+                s_EndEffector.intakeAlgae();
             }
             else {
-                s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
+                s_EndEffector.setPivot(EndoFactorSubsystem.PivotTarget.AlgaeIntake);
             }
         }
         else if (bp_Operator.getButtonPressed(Button.CoralIn) && !s_EndEffector.getIsIntakeDisabled() && s_Elevator.getElevatorLevel() == Level.Stow) {
@@ -96,12 +96,12 @@ public class EndoFactorDefaultCommand extends Command {
         // Eject
         if (bp_Operator.getButton(Button.AlgaeOut)) {
             System.out.println("Algae Out");
-            if (s_EndEffector.isPivotTarget(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake)) {
+            if (s_EndEffector.isPivotTarget(EndoFactorSubsystem.PivotTarget.AlgaeIntake)) {
                 s_EndEffector.ejectAlgae(); // TODO
                 s_EndEffector.canGoToCoralPos(true);
             }
             else {
-                s_EndEffector.setPivot(SameDayDeliverySubsystem.PivotTarget.AlgaeIntake);
+                s_EndEffector.setPivot(EndoFactorSubsystem.PivotTarget.AlgaeIntake);
             }
         }
         else if (bp_Operator.getButtonPressed(Button.CoralOut)) {
