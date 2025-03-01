@@ -11,11 +11,23 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveDrivetrainSubsystem;
 
 public class DriveToPoseCommand extends Command {
+    // These are the positions the robot should drive to.
+    // The origin is the center of the field, behind the robot starting line.
+    public enum Position {
+        Origin(0, 0, 0),
+        
+        ;
+        double x, y, angle;
+        Pose2d pose;
+        Position(double x, double y, double angle) {
+            this.x = x;
+            this.y = y;
+            this.angle = angle;
+            this.pose = new Pose2d(new Translation2d(x, y), Rotation2d.fromDegrees(angle));
+        }
+    }
 
     // 1 UNIT ~ 50 cm
-
-    // These are the positions the robot should drive to.
-    public static final Pose2d Origin = new Pose2d(new Translation2d(0.0,0.0), Rotation2d.fromDegrees(0.0));
 
     // The maximum Swerve speed
     private final double c_MaxSwerveSpeed = 5.12; // kSpeedAt12VoltsMps desired top speed

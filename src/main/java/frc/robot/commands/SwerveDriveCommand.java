@@ -3,6 +3,7 @@ package frc.robot.commands;
 import com.ctre.phoenix6.swerve.*;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveDrivetrainSubsystem;
@@ -57,6 +58,11 @@ public class SwerveDriveCommand extends Command {
             .withVelocityY(strafe * c_MaxSwerveSpeed) // Drive left with negative X (left)
             .withRotationalRate(rotate * c_MaxSwerveAngularRate) // Drive counterclockwise with negative X (left)
         );
+
+        SmartDashboard.putNumber("SWERVE - X", s_Swerve.getState().Pose.getX());
+        SmartDashboard.putNumber("SWERVE - Y", s_Swerve.getState().Pose.getY());
+        SmartDashboard.putNumber("SWERVE - Rotation", s_Swerve.getState().Pose.getRotation().getDegrees());
+
     }
 
     @Override

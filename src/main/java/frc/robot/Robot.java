@@ -132,43 +132,44 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    boolean hasTarget = LimelightHelpers.getTV(Config.kLimelight);
+    // boolean hasTarget = LimelightHelpers.getTV(Config.kLimelight);
 
-    if (hasTarget) {
-      // Get the AprilTag ID
-      double tagID = LimelightHelpers.getFiducialID(Config.kLimelight);
+  //   if (hasTarget) {
+  //     // Get the AprilTag ID
+  //     double tagID = LimelightHelpers.getFiducialID(Config.kLimelight);
 
-      // Get the translation of the detected AprilTag (in meters)
-      double[] translation = LimelightHelpers.getBotPose(Config.kLimelight);
+  //     // Get the translation of the detected AprilTag (in meters)
+  //     double[] translation = LimelightHelpers.getBotPose(Config.kLimelight);
 
-      // Convert the translation to inches (1 meter = 39.3701 inches)
-      double translationXInches = translation[0] * 39.3701;
-      double translationYInches = translation[1] * 39.3701;
-      double translationZInches = translation[2] * 39.3701;
+  //     // Convert the translation to inches (1 meter = 39.3701 inches)
+  //     double translationXInches = translation[0] * 39.3701;
+  //     double translationYInches = translation[1] * 39.3701;
+  //     double translationZInches = translation[2] * 39.3701;
 
-      // Display the detected information on the SmartDashboard
-      SmartDashboard.putNumber("AprilTag ID", tagID);
-      SmartDashboard.putNumber("Translation X (inches)", translationXInches);
-      SmartDashboard.putNumber("Translation Y (inches)", translationYInches);
-      SmartDashboard.putNumber("Translation Z (inches)", translationZInches);
-  } else {
-      SmartDashboard.putString("AprilTag Status", "No target detected");
-  }
+  //     // Display the detected information on the SmartDashboard
+  //     SmartDashboard.putNumber("AprilTag ID", tagID);
+  //     SmartDashboard.putString("AprilTag Status", "Target detected");
+  //     SmartDashboard.putNumber("Translation X (inches)", translationXInches);
+  //     SmartDashboard.putNumber("Translation Y (inches)", translationYInches);
+  //     SmartDashboard.putNumber("Translation Z (inches)", translationZInches);
+  // } else {
+  //     SmartDashboard.putString("AprilTag Status", "No target detected");
+  // }
 
-    // NetworkTable table = NetworkTableInstance.getDefault().getTable(Config.kLimelight);
-    // NetworkTableEntry ty = table.getEntry("ty");
-    // double targetOffsetAngle_Vertical = ty.getDouble(0.0);
-    // double limelightMountAngleDegrees = 25.0;
-    // double limelightLenseHeightInches = 20.0;
+    NetworkTable table = NetworkTableInstance.getDefault().getTable(Config.kLimelight);
+    NetworkTableEntry ty = table.getEntry("ty");
+    double targetOffsetAngle_Vertical = ty.getDouble(0.0);
+    double limelightMountAngleDegrees = 27.0;
+    double limelightLenseHeightInches = 8.5;
 
-    // double goalHeightInches = 60.0;
+    double goalHeightInches = 50.125;
 
-    // double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
-    // double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+    double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
-    // double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLenseHeightInches) / Math.tan(angleToGoalRadians);
+    double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLenseHeightInches) / Math.tan(angleToGoalRadians);
 
-    // SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
+    SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
   }
 
   @Override
