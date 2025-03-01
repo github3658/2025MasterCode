@@ -15,10 +15,16 @@ public class DriveToPoseCommand extends Command {
     // The origin is the center of the field, behind the robot starting line.
     public enum Position {
         Origin(0, 0, 0),
-        
+        Face1LeftCoral(2.662, 0, 0),
+
+        Face1RightCoral(0, 0, 0),
+        Face2LeftCoral(0, 0, 0),
+        Face2RightCoral(0, 0, 0),
+        Face6LeftCoral(0, 0, 0),
+        Face6RightCoral(0, 0, 0),
         ;
-        double x, y, angle;
-        Pose2d pose;
+        public double x, y, angle;
+        public Pose2d pose;
         Position(double x, double y, double angle) {
             this.x = x;
             this.y = y;
@@ -30,7 +36,7 @@ public class DriveToPoseCommand extends Command {
     // 1 UNIT ~ 50 cm
 
     // The maximum Swerve speed
-    private final double c_MaxSwerveSpeed = 5.12; // kSpeedAt12VoltsMps desired top speed
+    private final double c_MaxSwerveSpeed = 5.12 * 0.75; // kSpeedAt12VoltsMps desired top speed
   	
     // The maximum Swerve rotation speed
     private final double c_MaxSwerveAngularRate = 3.0 * Math.PI; // 3/4 of a rotation per second max angular velocity
@@ -78,9 +84,6 @@ public class DriveToPoseCommand extends Command {
         d_Strafe = toReasonableValue(p_TargetPose.getY() - currentPose.getY());
         d_Rotate = toReasonableValue(p_TargetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
 
-        SmartDashboard.putNumber("AUTON ROT TARGET",p_TargetPose.getRotation().getRadians());
-        SmartDashboard.putNumber("AUTON ROT CURRENT",currentPose.getRotation().getRadians());
-
         if (Math.abs(d_Forward) > c_SwerveRampDeadzone || Math.abs(d_Strafe) > c_SwerveRampDeadzone || Math.abs(d_Rotate) > c_SwerveRampDeadzone) {
             d_SwerveRamp = Math.min(d_SwerveRamp+1/c_AccelTime,1);
         }
@@ -104,6 +107,6 @@ public class DriveToPoseCommand extends Command {
     // This is a bad function name.
     // It converts a distance to a reasonable forward/strafe speed.
     private double toReasonableValue(double dist) {
-        return Math.min(Math.max(dist/4,-0.5),0.5);
+        return Math.min(Math.max(dist/2,-0.5),0.5);
     }
 }

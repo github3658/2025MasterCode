@@ -1,6 +1,9 @@
 package frc.robot;
 
+import java.util.Queue;
+
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class ButtonPanel {
     public enum Button {
@@ -22,13 +25,16 @@ public class ButtonPanel {
         DeepClimbRetract(14);
         public final int value;
         public final int indicator;
+        public boolean pressed;
         Button(int value) {
             this.value = value;
             this.indicator = 0;
+            this.pressed = false;
         }
         Button(int value, int indicator) {
             this.value = value;
             this.indicator = indicator;
+            this.pressed = false;
         }
     }
 
@@ -44,7 +50,7 @@ public class ButtonPanel {
      * @return True or false
      */
     public boolean getButton(Button button) {
-        return button_panel.getRawButton(button.value);
+        return (button.pressed || button_panel.getRawButton(button.value));
     }
 
     /**
@@ -53,7 +59,10 @@ public class ButtonPanel {
      * @return True or false
      */
     public boolean getButtonPressed(Button button) {
-        return button_panel.getRawButtonPressed(button.value);
+        SmartDashboard.putBoolean("-"+button.name(), button.pressed);
+        boolean p = button.pressed;
+        button.pressed = false;
+        return (p || button_panel.getRawButtonPressed(button.value));
     }
 
     public void setIndicatorLight(Button button, boolean on) {

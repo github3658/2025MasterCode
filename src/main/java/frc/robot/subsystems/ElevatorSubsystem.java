@@ -37,7 +37,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
     }
 
-    private final double c_AcceptableEncoderRange = 0.1;
+    private final double c_AcceptableEncoderRange = 0.75;
 
     private boolean b_locked;
     private Level l_TargetLevel = Level.Stow;

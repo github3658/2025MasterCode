@@ -9,6 +9,12 @@ import frc.robot.subsystems.ElevatorSubsystem.Level;
 import frc.robot.subsystems.SameDayDeliverySubsystem.PivotTarget;
 import frc.robot.ButtonPanel.Button;
 import frc.robot.commands.*; // This imports all of our commands.
+import frc.robot.commands.DriveToPoseCommand.Position;
+import frc.robot.commands.autonomous.ButtonPanelPressCommand;
+import frc.robot.commands.autonomous.WaitForTrue;
+
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -18,6 +24,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -90,6 +97,22 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     // We'll count the reef faces from 1 to 6
+
+    new ParallelCommandGroup(
+      new ParallelCommandGroup(
+        new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true),
+        new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator).ignoringDisable(true)
+      ),
+      new SequentialCommandGroup(
+        new DriveToPoseCommand(s_Swerve, Position.Face1LeftCoral.pose),
+        new ButtonPanelPressCommand(Button.ElevatorPosition4, true),
+        new WaitForTrue(() -> s_Elevator.isFinished()),
+        new ButtonPanelPressCommand(Button.CoralOut, true),
+        new WaitForTrue(() -> s_EndEffector.isFinished())
+        //new ButtonPanelPressCommand(Button.CoralOut, true),
+        //new ButtonPanelPressCommand(Button.Stow, true)
+      )
+    ).schedule();
 
     // REEF FACE 1
     // new SequentialCommandGroup(
