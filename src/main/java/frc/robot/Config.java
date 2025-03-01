@@ -2,6 +2,7 @@ package frc.robot;
 
 public class Config {
     public static final String kCanbus = "3658";
+    public static final String kLimelight = "";
     public static final int kPigeon = 13;
     public static final int kCandle = 60;
     public static final int kLEDCount = 68;

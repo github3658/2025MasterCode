@@ -8,7 +8,7 @@ import frc.robot.Config;
 
 public class ClimbSubsystem extends SubsystemBase {
 
-    private final double d_ClimbSpeed = 0.0625;
+    private final double d_ClimbSpeed = 0.75;
 
     private TalonFX m_LiftMotor = new TalonFX(Config.kLiftMotor, Config.kCanbus);
 

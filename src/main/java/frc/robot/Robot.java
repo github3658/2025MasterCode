@@ -12,6 +12,9 @@ import frc.robot.commands.*; // This imports all of our commands.
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -123,10 +126,50 @@ public class Robot extends TimedRobot {
 		//   new DriveToPoseCommand(s_Swerve, new Pose2d(new Translation2d(3.95, 1.2), new Rotation2d(Math.toRadians(-60))))
 		// ).schedule();
     //new Orangelight(s_Swerve).schedule();
+    
+    LimelightHelpers.setPipelineIndex(Config.kLimelight, 0);
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    boolean hasTarget = LimelightHelpers.getTV(Config.kLimelight);
+
+    if (hasTarget) {
+      // Get the AprilTag ID
+      double tagID = LimelightHelpers.getFiducialID(Config.kLimelight);
+
+      // Get the translation of the detected AprilTag (in meters)
+      double[] translation = LimelightHelpers.getBotPose(Config.kLimelight);
+
+      // Convert the translation to inches (1 meter = 39.3701 inches)
+      double translationXInches = translation[0] * 39.3701;
+      double translationYInches = translation[1] * 39.3701;
+      double translationZInches = translation[2] * 39.3701;
+
+      // Display the detected information on the SmartDashboard
+      SmartDashboard.putNumber("AprilTag ID", tagID);
+      SmartDashboard.putNumber("Translation X (inches)", translationXInches);
+      SmartDashboard.putNumber("Translation Y (inches)", translationYInches);
+      SmartDashboard.putNumber("Translation Z (inches)", translationZInches);
+  } else {
+      SmartDashboard.putString("AprilTag Status", "No target detected");
+  }
+
+    // NetworkTable table = NetworkTableInstance.getDefault().getTable(Config.kLimelight);
+    // NetworkTableEntry ty = table.getEntry("ty");
+    // double targetOffsetAngle_Vertical = ty.getDouble(0.0);
+    // double limelightMountAngleDegrees = 25.0;
+    // double limelightLenseHeightInches = 20.0;
+
+    // double goalHeightInches = 60.0;
+
+    // double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+    // double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+
+    // double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLenseHeightInches) / Math.tan(angleToGoalRadians);
+
+    // SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
+  }
 
   @Override
   public void autonomousExit() {}
@@ -150,7 +193,8 @@ double counter = 0.0;
   }
 
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+  }
 
   @Override
   public void testExit() {}
