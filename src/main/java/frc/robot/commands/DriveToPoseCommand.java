@@ -6,19 +6,39 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.ElevatorSubsystem.Level;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveDrivetrainSubsystem;
 
 public class DriveToPoseCommand extends Command {
+    // These are the positions the robot should drive to.
+    // The origin is the center of the field, behind the robot starting line.
+    public enum Position {
+        Origin(0, 0, 0),
+        Face1LeftCoral(2.662, 0, 0),
+        Face1Backup(2, 0, 0),
+
+        Face1RightCoral(0, 0, 0),
+        Face2LeftCoral(0, 0, 0),
+        Face2RightCoral(0, 0, 0),
+        Face6LeftCoral(0, 0, 0),
+        Face6RightCoral(0, 0, 0),
+        ;
+        public double x, y, angle;
+        public Pose2d pose;
+        Position(double x, double y, double angle) {
+            this.x = x;
+            this.y = y;
+            this.angle = angle;
+            this.pose = new Pose2d(new Translation2d(x, y), Rotation2d.fromDegrees(angle));
+        }
+    }
 
     // 1 UNIT ~ 50 cm
 
-    // These are the positions the robot should drive to.
-    public static final Pose2d Origin = new Pose2d(new Translation2d(0.0,0.0), Rotation2d.fromDegrees(0.0));
-
     // The maximum Swerve speed
-    private final double c_MaxSwerveSpeed = 5.12; // kSpeedAt12VoltsMps desired top speed
+    private final double c_MaxSwerveSpeed = 5.12 * 0.75; // kSpeedAt12VoltsMps desired top speed
   	
     // The maximum Swerve rotation speed
     private final double c_MaxSwerveAngularRate = 3.0 * Math.PI; // 3/4 of a rotation per second max angular velocity
@@ -47,9 +67,11 @@ public class DriveToPoseCommand extends Command {
     .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private SwerveDrivetrainSubsystem s_Swerve;
+    private ElevatorSubsystem s_Elevator;
 
-    public DriveToPoseCommand(SwerveDrivetrainSubsystem s, Pose2d target) {
+    public DriveToPoseCommand(SwerveDrivetrainSubsystem s, ElevatorSubsystem e, Pose2d target) {
         s_Swerve = s;
+        s_Elevator = e;
         p_TargetPose = target;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
         addRequirements(s_Swerve);
     }
@@ -66,9 +88,6 @@ public class DriveToPoseCommand extends Command {
         d_Strafe = toReasonableValue(p_TargetPose.getY() - currentPose.getY());
         d_Rotate = toReasonableValue(p_TargetPose.getRotation().getRadians() - currentPose.getRotation().getRadians());
 
-        SmartDashboard.putNumber("AUTON ROT TARGET",p_TargetPose.getRotation().getRadians());
-        SmartDashboard.putNumber("AUTON ROT CURRENT",currentPose.getRotation().getRadians());
-
         if (Math.abs(d_Forward) > c_SwerveRampDeadzone || Math.abs(d_Strafe) > c_SwerveRampDeadzone || Math.abs(d_Rotate) > c_SwerveRampDeadzone) {
             d_SwerveRamp = Math.min(d_SwerveRamp+1/c_AccelTime,1);
         }
@@ -76,9 +95,10 @@ public class DriveToPoseCommand extends Command {
             d_SwerveRamp = Math.max(d_SwerveRamp-1/c_AccelTime,0);
         }
 
+        double elevatorSpeedReduction = (s_Elevator.getEncoderValue()/Level.Coral4.value)*0.75; // From 0 to 1 (0% to 100%), how much do we reduce swerve speed?
         s_Swerve.setControl(drive_field.
-            withVelocityX(d_Forward * d_SwerveRamp * c_MaxSwerveSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(d_Strafe * d_SwerveRamp * c_MaxSwerveSpeed) // Drive left with negative X (left)
+            withVelocityX(d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed) // Drive forward with negative Y (forward)
+            .withVelocityY(d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed) // Drive left with negative X (left)
             .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
         );
     }
@@ -92,6 +112,6 @@ public class DriveToPoseCommand extends Command {
     // This is a bad function name.
     // It converts a distance to a reasonable forward/strafe speed.
     private double toReasonableValue(double dist) {
-        return Math.min(Math.max(dist/4,-0.5),0.5);
+        return Math.min(Math.max(dist/2,-0.5),0.5);
     }
 }

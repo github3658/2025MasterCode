@@ -1,8 +1,10 @@
 package frc.robot.commands;
 
 import com.ctre.phoenix6.swerve.*;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveDrivetrainSubsystem;
@@ -52,11 +54,22 @@ public class SwerveDriveCommand extends Command {
             rotate *= 0.25;
         }
 
-        s_Swerve.setControl(drive.
-            withVelocityX(forward * c_MaxSwerveSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(strafe * c_MaxSwerveSpeed) // Drive left with negative X (left)
-            .withRotationalRate(rotate * c_MaxSwerveAngularRate) // Drive counterclockwise with negative X (left)
-        );
+        // if (xb_Driver.getLeftBumperButton() && xb_Driver.getRightBumperButton() && xb_Driver.getLeftTriggerAxis() > 0.5 && xb_Driver.getRightTriggerAxis() > 0.5 && xb_Driver.getAButton() && xb_Driver.getBButton() && xb_Driver.getXButton() && xb_Driver.getYButton() && xb_Driver.getLeftStickButton()) {
+            // s_Swerve.Honk();
+        // }
+        // else {
+        if (!s_Swerve.b_honking) {
+            s_Swerve.setControl(drive.
+                withVelocityX(forward * c_MaxSwerveSpeed) // Drive forward with negative Y (forward)
+                .withVelocityY(strafe * c_MaxSwerveSpeed) // Drive left with negative X (left)
+                .withRotationalRate(rotate * c_MaxSwerveAngularRate) // Drive counterclockwise with negative X (left)
+            );
+        }
+
+        SmartDashboard.putNumber("SWERVE - X", s_Swerve.getState().Pose.getX());
+        SmartDashboard.putNumber("SWERVE - Y", s_Swerve.getState().Pose.getY());
+        SmartDashboard.putNumber("SWERVE - Rotation", s_Swerve.getState().Pose.getRotation().getDegrees());
+
     }
 
     @Override

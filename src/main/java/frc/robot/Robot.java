@@ -6,15 +6,21 @@ package frc.robot;
 
 import frc.robot.subsystems.*; // This imports all of our subsystems.
 import frc.robot.subsystems.ElevatorSubsystem.Level;
-import frc.robot.subsystems.SameDayDeliverySubsystem.PivotTarget;
+import frc.robot.subsystems.LEDSubsystem.Color;
+import frc.robot.subsystems.EndoFactorSubsystem.PivotTarget;
 import frc.robot.ButtonPanel.Button;
 import frc.robot.commands.*; // This imports all of our commands.
+import frc.robot.commands.DriveToPoseCommand.Position;
+import frc.robot.commands.autonomous.ButtonPanelPressCommand;
+import frc.robot.commands.autonomous.WaitForTrue;
+
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,7 +38,7 @@ public class Robot extends TimedRobot {
 
   private SwerveDrivetrainSubsystem s_Swerve = TunerConstants.createDrivetrain();
   private ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
-  private SameDayDeliverySubsystem s_EndEffector = new SameDayDeliverySubsystem();
+  private EndoFactorSubsystem s_EndEffector = new EndoFactorSubsystem();
   private ClimbSubsystem s_ClimbSubsystem = new ClimbSubsystem();
   private LEDSubsystem s_LED = new LEDSubsystem();
 
@@ -61,10 +67,12 @@ public class Robot extends TimedRobot {
       s_EndEffector.setPivot(PivotTarget.SafetyTarget);
     }
 
-    if (s_Elevator.isFinished() && s_Elevator.getElevatorLevel() == Level.Stow && (s_EndEffector.getPivotTarget() != PivotTarget.CoralIntake && s_EndEffector.getPivotTarget() != PivotTarget.AlgaeIntake)) {
+    // Once in stow, go to stow position
+    if (s_Elevator.isFinished() && s_Elevator.getElevatorLevel() == Level.Stow && (s_EndEffector.getPivotTarget() != PivotTarget.CoralIntake && s_EndEffector.getPivotTarget() != PivotTarget.AlgaeIntakeStow)) {
       s_EndEffector.setPivot(PivotTarget.CoralIntake);
     }
     
+    // Unlock and lock the elevator depending on whether the endeffector is in safety
     if (s_Elevator.getLocked() && s_EndEffector.isSafe() && !s_EndEffector.isPivotTarget(PivotTarget.CoralIntake)) {
       System.out.println("Unlock Elevator");
       s_Elevator.setLocked(false);
@@ -72,6 +80,17 @@ public class Robot extends TimedRobot {
     else if (!s_Elevator.getLocked() && !s_EndEffector.isSafe()) {
       System.out.println("Lock Elevator");
       s_Elevator.setLocked(true);
+    }
+
+    // LED Controls
+    if (!s_Elevator.isFinished() || !s_EndEffector.isFinished()) {
+      s_LED.setColor(Color.Yellow);
+    }
+    else if (s_EndEffector.hasCoral()) {
+      s_LED.setColor(Color.Green);
+    }
+    else {
+      s_LED.setColor(Color.Alliance);
     }
   }
 
@@ -87,6 +106,24 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     // We'll count the reef faces from 1 to 6
+
+    new ParallelCommandGroup(
+      new ParallelCommandGroup(
+        new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true).withDeadline(null),
+        new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator).ignoringDisable(true)
+      ),
+      new SequentialCommandGroup(
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Face1LeftCoral.pose),
+        new ButtonPanelPressCommand(Button.ElevatorPosition4, true),
+        new WaitForTrue(() -> s_Elevator.isFinished()),
+        new ButtonPanelPressCommand(Button.CoralOut, true),
+        new WaitForTrue(() -> s_EndEffector.isFinished()),
+        new ButtonPanelPressCommand(Button.CoralOut, true),
+        new ButtonPanelPressCommand(Button.Stow, true),
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Face1Backup.pose),
+        new ButtonPanelPressCommand(Button.Stow, true)
+      )
+    ).schedule();
 
     // REEF FACE 1
     // new SequentialCommandGroup(
@@ -123,10 +160,51 @@ public class Robot extends TimedRobot {
 		//   new DriveToPoseCommand(s_Swerve, new Pose2d(new Translation2d(3.95, 1.2), new Rotation2d(Math.toRadians(-60))))
 		// ).schedule();
     //new Orangelight(s_Swerve).schedule();
+    
+    LimelightHelpers.setPipelineIndex(Config.kLimelight, 0);
   }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    // boolean hasTarget = LimelightHelpers.getTV(Config.kLimelight);
+
+  //   if (hasTarget) {
+  //     // Get the AprilTag ID
+  //     double tagID = LimelightHelpers.getFiducialID(Config.kLimelight);
+
+  //     // Get the translation of the detected AprilTag (in meters)
+  //     double[] translation = LimelightHelpers.getBotPose(Config.kLimelight);
+
+  //     // Convert the translation to inches (1 meter = 39.3701 inches)
+  //     double translationXInches = translation[0] * 39.3701;
+  //     double translationYInches = translation[1] * 39.3701;
+  //     double translationZInches = translation[2] * 39.3701;
+
+  //     // Display the detected information on the SmartDashboard
+  //     SmartDashboard.putNumber("AprilTag ID", tagID);
+  //     SmartDashboard.putString("AprilTag Status", "Target detected");
+  //     SmartDashboard.putNumber("Translation X (inches)", translationXInches);
+  //     SmartDashboard.putNumber("Translation Y (inches)", translationYInches);
+  //     SmartDashboard.putNumber("Translation Z (inches)", translationZInches);
+  // } else {
+  //     SmartDashboard.putString("AprilTag Status", "No target detected");
+  // }
+
+    NetworkTable table = NetworkTableInstance.getDefault().getTable(Config.kLimelight);
+    NetworkTableEntry ty = table.getEntry("ty");
+    double targetOffsetAngle_Vertical = ty.getDouble(0.0);
+    double limelightMountAngleDegrees = 27.0;
+    double limelightLenseHeightInches = 8.5;
+
+    double goalHeightInches = 50.125;
+
+    double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+
+    double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLenseHeightInches) / Math.tan(angleToGoalRadians);
+
+    SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
+  }
 
   @Override
   public void autonomousExit() {}
@@ -147,10 +225,18 @@ double counter = 0.0;
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
+    s_Swerve.InitializeHonk();
   }
 
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    if (bp_Operator.getButton(Button.HONK)) {
+      s_Swerve.Honk(true);
+    }
+    else {
+      s_Swerve.Honk(false);
+    }
+  }
 
   @Override
   public void testExit() {}

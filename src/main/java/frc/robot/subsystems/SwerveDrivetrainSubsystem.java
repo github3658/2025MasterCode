@@ -4,8 +4,11 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.Orchestra;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MusicTone;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -216,6 +219,36 @@ public class SwerveDrivetrainSubsystem extends TunerSwerveDrivetrain implements 
      */
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutineToApply.dynamic(direction);
+    }
+
+    public boolean b_honking;
+    private Orchestra o_Honk;
+
+    public void InitializeHonk() {
+        o_Honk.addInstrument(getModule(0).getDriveMotor());
+        o_Honk.addInstrument(getModule(0).getSteerMotor());
+        o_Honk.addInstrument(getModule(1).getDriveMotor());
+        o_Honk.addInstrument(getModule(1).getSteerMotor());
+        o_Honk.addInstrument(getModule(2).getDriveMotor());
+        o_Honk.addInstrument(getModule(2).getSteerMotor());
+        o_Honk.addInstrument(getModule(3).getDriveMotor());
+        o_Honk.addInstrument(getModule(3).getSteerMotor());
+        o_Honk.loadMusic("honk.chrp");
+        o_Honk.stop();
+    }
+
+    public void Honk(boolean honking) {
+        if (honking) {
+            System.out.println("HONK");
+            if (!b_honking) {
+                o_Honk.play();
+            }
+            b_honking = true;
+        }
+        else if (b_honking) {
+            b_honking = false;
+            o_Honk.stop();
+        }
     }
 
     @Override
