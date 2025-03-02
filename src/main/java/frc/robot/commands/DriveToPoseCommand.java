@@ -6,8 +6,9 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.ElevatorSubsystem.Level;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveDrivetrainSubsystem;
 
 public class DriveToPoseCommand extends Command {
@@ -16,6 +17,7 @@ public class DriveToPoseCommand extends Command {
     public enum Position {
         Origin(0, 0, 0),
         Face1LeftCoral(2.662, 0, 0),
+        Face1Backup(2, 0, 0),
 
         Face1RightCoral(0, 0, 0),
         Face2LeftCoral(0, 0, 0),
@@ -65,9 +67,11 @@ public class DriveToPoseCommand extends Command {
     .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private SwerveDrivetrainSubsystem s_Swerve;
+    private ElevatorSubsystem s_Elevator;
 
-    public DriveToPoseCommand(SwerveDrivetrainSubsystem s, Pose2d target) {
+    public DriveToPoseCommand(SwerveDrivetrainSubsystem s, ElevatorSubsystem e, Pose2d target) {
         s_Swerve = s;
+        s_Elevator = e;
         p_TargetPose = target;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
         addRequirements(s_Swerve);
     }
@@ -91,9 +95,10 @@ public class DriveToPoseCommand extends Command {
             d_SwerveRamp = Math.max(d_SwerveRamp-1/c_AccelTime,0);
         }
 
+        double elevatorSpeedReduction = (s_Elevator.getEncoderValue()/Level.Coral4.value)*0.75; // From 0 to 1 (0% to 100%), how much do we reduce swerve speed?
         s_Swerve.setControl(drive_field.
-            withVelocityX(d_Forward * d_SwerveRamp * c_MaxSwerveSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(d_Strafe * d_SwerveRamp * c_MaxSwerveSpeed) // Drive left with negative X (left)
+            withVelocityX(d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed) // Drive forward with negative Y (forward)
+            .withVelocityY(d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed) // Drive left with negative X (left)
             .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
         );
     }

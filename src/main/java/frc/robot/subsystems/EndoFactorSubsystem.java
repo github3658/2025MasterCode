@@ -13,8 +13,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
 
-public class SameDayDeliverySubsystem extends SubsystemBase {
-    public SameDayDeliverySubsystem() {
+public class EndoFactorSubsystem extends SubsystemBase {
+    public EndoFactorSubsystem() {
         pt_PivotTarget = PivotTarget.CoralIntake;
         setMotorConfig();
         zeroDeliveryPosition();
@@ -33,7 +33,8 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         }
     }
     private EjectSpeed es_EjectSpeed = EjectSpeed.Level1;
-    private final double d_PivotMotorSpeed = 0.0625;
+    private final double d_PivotMotorSpeed = 0.08;
+    private final double c_PivotSupplyCurrentLimit = 2.5;
     private boolean b_hasCoral;
     
     private void setMotorConfig() {
@@ -52,6 +53,9 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     //region Properies
     private final TalonFX m_DeliveryMotor = new TalonFX(Config.kDeliveryMotorId, Config.kCanbus); 
     private final CANrange s_DeliveryRange = new CANrange(Config.kDeliveryRangeId, Config.kCanbus);
+
+    private final double d_EncoderLeewayRange = 0.005;
+    private final double c_DeliverySupplyCurrentLimit = 5.0;
 
     /** The max range for when we know coral is in the Endofactor. */ 
     private final double d_CoralDetectionRange = 0.04;
@@ -77,7 +81,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
 
     //region Methods
     //region Coral
-    public SameDayDeliverySubsystem intakeCoral() {
+    public EndoFactorSubsystem intakeCoral() {
         if (!b_IsCoralIntakeDisabled) {
             i_SuccessfulCoralDetectionSamples = 0;
             b_IsCoralIntakeDisabled = true; // Prevents the player's button press.
@@ -91,8 +95,8 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         return this;
     }
 
-    public SameDayDeliverySubsystem ejectCoral() {
-        if (!b_IsCoralOutputDisabled) {
+    public EndoFactorSubsystem ejectCoral() {
+        if (!b_IsCoralOutputDisabled || true) {
             b_IsCoralOutputDisabled = true;
             b_IsCoralEjecting = true; 
             m_DeliveryMotor.set(es_EjectSpeed.value);
@@ -127,7 +131,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         return s_DeliveryRange.getDistance().getValueAsDouble();
     }
 
-    public SameDayDeliverySubsystem timerExecute() {
+    public EndoFactorSubsystem timerExecute() {
         if (b_IsCoralIntakeTimerEnabled) {
             if (hasCoral()) {
                 System.out.println("DETECT CORAL");
@@ -152,7 +156,7 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         b_IsCoralIntakeTimerEnabled = false; 
     }
 
-    public SameDayDeliverySubsystem runIntakeToPose() {
+    public EndoFactorSubsystem runIntakeToPose() {
         SmartDashboard.putNumber("INTAKE - POSITION", getDeliveryPosition());
         SmartDashboard.putNumber("INTAKE - TARGET", d_TargetCoralPosition);
         if (b_IsCoralRunningIntakeToPose || b_IsCoralEjecting) {
@@ -174,11 +178,12 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
 
     //region Algae
     public void intakeAlgae() {
-        m_DeliveryMotor.set(-d_IntakeMotorSpeed);
+        double speed = m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit ? 0 : -d_IntakeMotorSpeed;
+        m_DeliveryMotor.set(speed);
     }
 
     public void ejectAlgae() {
-        m_DeliveryMotor.set(d_IntakeMotorSpeed);
+        m_DeliveryMotor.set(0.50);
     }
 
     public void stopAlgaeDelivery() {
@@ -209,7 +214,8 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
         Level1(-0.415),
         Level2AndLevel3(-0.366),
         Level4(-0.243),
-        AlgaeIntake(0.128)
+        AlgaeIntake(0.128),
+        AlgaeIntakeStow(0.050),
         ;
         double value;
         PivotTarget(double value) {
@@ -223,8 +229,8 @@ public class SameDayDeliverySubsystem extends SubsystemBase {
     //region Methods
 public void runPivotToPose(PivotTarget target) {
     double d_CurrentPose = getPivotPosition();
-
-    double speed = Math.min(Math.max((target.value - d_CurrentPose) * 75, -1), 1);
+    double c_Current = m_PivotMotor.getSupplyCurrent().getValueAsDouble();
+    double speed = c_Current > c_PivotSupplyCurrentLimit ? 0 : Math.min(Math.max((target.value - d_CurrentPose) * 75, -1), 1);
 
     m_PivotMotor.set(speed * d_PivotMotorSpeed);
 }
@@ -234,7 +240,7 @@ public void runPivotToPose(PivotTarget target) {
     }
 
     public boolean isFinished() {
-        return(getPivotPosition() >= getPivotTarget().value - 0.004 && getPivotPosition() <= getPivotTarget().value + 0.004);
+        return(getPivotPosition() >= getPivotTarget().value - d_EncoderLeewayRange && getPivotPosition() <= getPivotTarget().value + d_EncoderLeewayRange);
     }
 
     public void setPivot(PivotTarget target) {
@@ -273,14 +279,28 @@ public void runPivotToPose(PivotTarget target) {
     //endregion
     //endregion
 
+    private double maxDeliveyCurrent = 0;
+    private double maxPivotCurrent = 0;
+
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Endofactor - current position", getPivotPosition());
-        SmartDashboard.putNumber("Endofactor - target position", pt_PivotTarget.value);
-        SmartDashboard.putNumber("Endofactor - dt range", getDeliveryRange());
-        SmartDashboard.putNumber("Endofactor - samples", i_SuccessfulCoralDetectionSamples);
+        SmartDashboard.putString("Endofactor - target position", pt_PivotTarget.name());
         SmartDashboard.putBoolean("Endofactor - is safe?", isSafe());
         SmartDashboard.putBoolean("Endofactor - has coral?", hasCoral());
+        //SmartDashboard.putNumber("Endofactor - Delivery stator current", m_DeliveryMotor.getStatorCurrent().getValueAsDouble());
+        //SmartDashboard.putNumber("Endofactor - Delivery voltage", m_DeliveryMotor.getMotorVoltage().getValueAsDouble());
+        if (maxDeliveyCurrent < m_DeliveryMotor.getSupplyCurrent().getValueAsDouble()) 
+            maxDeliveyCurrent= m_DeliveryMotor.getSupplyCurrent().getValueAsDouble();
+
+        if (maxPivotCurrent < m_PivotMotor.getSupplyCurrent().getValueAsDouble())
+            maxPivotCurrent = m_PivotMotor.getSupplyCurrent().getValueAsDouble();
+
+        SmartDashboard.putNumber("MaxDeliveryCurrent", maxDeliveyCurrent);
+        SmartDashboard.putNumber("MaxPivotCurrent", maxPivotCurrent);
+        
+        System.out.println("PivotSupply"+m_PivotMotor.getSupplyCurrent().getValueAsDouble());
+        System.out.println("DeliverySupply"+m_DeliveryMotor.getSupplyCurrent().getValueAsDouble());
+
         //runPivotToPose(pt_PivotTarget);
         if (getDeliveryRange() < d_CoralDetectionRange) { 
             i_SuccessfulCoralDetectionSamples++;
@@ -292,7 +312,18 @@ public void runPivotToPose(PivotTarget target) {
             i_SuccessfulCoralDetectionSamples = 0;
             b_hasCoral = false;
         }
+
+        // Disable coral controls in algae mode for Operator clarity
+        if (getPivotTarget() == PivotTarget.AlgaeIntake || getPivotTarget() == PivotTarget.AlgaeIntakeStow) {
+            b_hasCoral = false;
+        }
+
         b_IsCoralOutputDisabled = !b_hasCoral;
         b_IsCoralIntakeDisabled = b_hasCoral;
+
+        if (b_IsCoralRunningIntakeToPose) {
+            b_IsCoralOutputDisabled = true;
+            b_IsCoralOutputDisabled = true;
+        }
     }
 }

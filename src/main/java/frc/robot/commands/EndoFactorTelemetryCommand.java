@@ -5,14 +5,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.ButtonPanel;
 import frc.robot.ButtonPanel.Button;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.SameDayDeliverySubsystem;
+import frc.robot.subsystems.EndoFactorSubsystem;
 
 public class EndoFactorTelemetryCommand extends Command {
-    private SameDayDeliverySubsystem s_EndEffector;
+    private EndoFactorSubsystem s_EndEffector;
     private ButtonPanel bp_Operator;
     private ElevatorSubsystem s_Elevator;
 
-    public EndoFactorTelemetryCommand(SameDayDeliverySubsystem sdd, ButtonPanel bp, ElevatorSubsystem e) {
+    public EndoFactorTelemetryCommand(EndoFactorSubsystem sdd, ButtonPanel bp, ElevatorSubsystem e) {
         s_EndEffector = sdd;
         bp_Operator = bp;
         s_Elevator = e;

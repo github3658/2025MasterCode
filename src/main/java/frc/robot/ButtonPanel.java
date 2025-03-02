@@ -1,7 +1,5 @@
 package frc.robot;
 
-import java.util.Queue;
-
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -14,8 +12,8 @@ public class ButtonPanel {
         ElevatorPositionBarge(5, 5),
         ManualClaw1(6),
         ManualClaw2(7),
-        ClawPositionCoral(12, 6),
-        ClawPositionAlgae(13, 7),
+        ClawPositionCoral(12, 12),
+        ClawPositionAlgae(13, 13),
         CoralIn(8, 8),
         CoralOut(9, 9),
         AlgaeIn(10, 10),

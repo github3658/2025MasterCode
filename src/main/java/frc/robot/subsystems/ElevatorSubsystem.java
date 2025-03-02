@@ -61,10 +61,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         m_RightElevatorMotor.getConfigurator().apply(cElevatorMotorConfig);
     }
 
-    private void Honk() {
-       // m_LeftElevatorMotor.setControl()
-    }
-
 
     @Override
     public void periodic() {
@@ -79,17 +75,15 @@ public class ElevatorSubsystem extends SubsystemBase {
                 m_LeftElevatorMotor.set(speed);
                 m_RightElevatorMotor.set(speed);
             }
-            SmartDashboard.putNumber("Elevator - Speed", speed); //Elevator speed in smartdashboard
         }
         else {
             m_LeftElevatorMotor.set(0);
-            SmartDashboard.putNumber("Elevator - Speed", 0); //Elevator speed in smartdashboard
         }
         SmartDashboard.putBoolean("Elevator - Finished", isFinished());
         SmartDashboard.putBoolean("Elevator - Locked", getLocked());
-        SmartDashboard.putNumber("Elevator - Level TARGET", getTargetLevel().value);
-        SmartDashboard.putNumber("Elevator - Level CURRENT", getEncoderValue());
-        SmartDashboard.putBoolean("Elevator - Limit Switch", dio_LimitSwitch.get());
+        SmartDashboard.putString("Elevator - Level TARGET", getTargetLevel().name());
+        SmartDashboard.putString("Elevator - Level CURRENT", getElevatorLevel().name());
+        SmartDashboard.putNumber("Elevator - Encoder Error", getTargetLevel().value - getEncoderValue());
     }
 
     /**

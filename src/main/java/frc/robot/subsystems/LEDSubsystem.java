@@ -1,4 +1,5 @@
 package frc.robot.subsystems;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
 
@@ -18,13 +19,14 @@ public class LEDSubsystem extends SubsystemBase {
      */
     public enum Color {
         Green(0, 255, 0),
-        Yellow(255, 255, 0),
+        Yellow(255, 192, 0),
         Blue(0, 0, 255),
-        Orange(255, 128, 0),
+        Orange(255, 96, 0),
         Red(255, 0, 0),
         White(255, 255, 255),
-        Magenta(255, 0, 255);
-        public final int r, g, b;
+        Magenta(255, 0, 255),
+        Alliance(0, 0, 0);
+        public int r, g, b;
         Color(int r, int g, int b) {
             this.r = r;
             this.g = g;
@@ -46,6 +48,8 @@ public class LEDSubsystem extends SubsystemBase {
     private final int c_CANDleID = Config.kCandle;
     private final int c_LEDCount = Config.kLEDCount;
 
+    private int i_Timer;
+
     /* CANDLE AND ANIMATIONS */
     public final CANdle m_CANdle = new CANdle(Config.kCandle, Config.kCanbus); // Ignore errors regarding the CANdle, it errantly thinks that com.ctre.phoenix can't be resolved.
 
@@ -65,6 +69,28 @@ public class LEDSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (i_Timer <= 0) {
+            i_Timer = 90;
+            if (DriverStation.getAlliance().isPresent()) {
+                if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+                    Color.Alliance.r = 255;
+                    Color.Alliance.g = 0;
+                    Color.Alliance.b = 0;
+                }
+                else {
+                    Color.Alliance.r = 0;
+                    Color.Alliance.g = 0;
+                    Color.Alliance.b = 255;
+                }
+            }
+            else {
+                Color.Alliance.r = 255;
+                Color.Alliance.g = 255;
+                Color.Alliance.b = 255;
+            }
+        }
+        i_Timer--;
+
         m_CANdle.setLEDs(
             Math.round(i_CurrentColor[0]*f_Brightness),
             Math.round(i_CurrentColor[1]*f_Brightness),
