@@ -120,8 +120,20 @@ public class Robot extends TimedRobot {
         new WaitForTrue(() -> s_EndEffector.isFinished()),
         new ButtonPanelPressCommand(Button.CoralOut, true),
         new ButtonPanelPressCommand(Button.Stow, true),
-        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Face1Backup.pose),
-        new ButtonPanelPressCommand(Button.Stow, true)
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Face1Backup.pose)
+        // new ButtonPanelPressCommand(Button.ElevatorPosition2, true),
+        // new ParallelCommandGroup (
+        //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Algea1.pose),
+        //   new ButtonPanelPressCommand(Button.AlgaeIn, true)
+        // ),
+        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Algea1Backup.pose),
+        // new ParallelCommandGroup(
+        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.FaceProcessor.pose),
+        // new ButtonPanelPressCommand(Button.Stow, true)
+        // ),
+        // new ButtonPanelPressCommand(Button.AlgaeIn, false),
+        // new ButtonPanelPressCommand(Button.AlgaeOut, true),
+        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin.pose)
       )
     ).schedule();
 
