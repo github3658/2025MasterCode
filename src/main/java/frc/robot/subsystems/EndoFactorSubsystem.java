@@ -230,7 +230,14 @@ public class EndoFactorSubsystem extends SubsystemBase {
 public void runPivotToPose(PivotTarget target) {
     double d_CurrentPose = getPivotPosition();
     double c_Current = m_PivotMotor.getSupplyCurrent().getValueAsDouble();
-    double speed = c_Current > c_PivotSupplyCurrentLimit ? 0 : Math.min(Math.max((target.value - d_CurrentPose) * 75, -1), 1);
+    double speed = 0;
+    
+    if (c_Current > c_PivotSupplyCurrentLimit) {
+        speed = 0;
+        target.value = d_CurrentPose;    
+    } else {
+        speed = Math.min(Math.max((target.value - d_CurrentPose) * 75, -1), 1);
+    }
 
     m_PivotMotor.set(speed * d_PivotMotorSpeed);
 }

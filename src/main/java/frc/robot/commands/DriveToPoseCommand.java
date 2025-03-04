@@ -16,7 +16,8 @@ public class DriveToPoseCommand extends Command {
     // The origin is the center of the field, behind the robot starting line.
     public enum Position {
         Origin(0, 0, 0),
-        Face1LeftCoral(2.662, 0, 0),
+        //Face1LeftCoral(2.662, 0, 0),
+        Face1LeftCoral(-3.026, 0, 0), //Y = 0.175
         Face1Backup(2, 0, 0),
 
         Face1RightCoral(0, 0, 0),

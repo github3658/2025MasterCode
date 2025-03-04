@@ -106,7 +106,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     // We'll count the reef faces from 1 to 6
-
     new ParallelCommandGroup(
       new ParallelCommandGroup(
         new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true).withDeadline(null),
@@ -120,8 +119,14 @@ public class Robot extends TimedRobot {
         new WaitForTrue(() -> s_EndEffector.isFinished()),
         new ButtonPanelPressCommand(Button.CoralOut, true),
         new ButtonPanelPressCommand(Button.Stow, true),
-        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Face1Backup.pose),
-        new ButtonPanelPressCommand(Button.Stow, true)
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Face1Backup.pose)
+        //new ButtonPanelPressCommand(Button.Stow, true)
+        // new ButtonPanelPressCommand(Button.ElevatorPosition2, true),
+        // new ParallelCommandGroup(
+        //   new DriveToPoseCommand(s_Swerve, s_Elevator, null),
+        //   new ButtonPanelPressCommand(Button.AlgaeIn, true)
+        // )
+
       )
     ).schedule();
 
