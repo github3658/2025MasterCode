@@ -21,7 +21,7 @@ public class DriveToPoseCommand extends Command {
         Face1Backup(2, 0, 0),
         Algae1Backup(2, -0.5, 0),
         Algae1(3.9, -0.5, 0, 0.35),
-        RightCoral(4.50, -1.775, -60.211),
+        RightCoral(4.45, -5.223, -60.240),
         CoralStationBackup(4.75, 0, 0, 0.35),
         CoralStation(12.646, 1.887, -135.214, 0.35),
 
