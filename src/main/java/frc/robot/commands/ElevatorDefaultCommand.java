@@ -39,6 +39,10 @@ public class ElevatorDefaultCommand extends Command {
         // so it's okay to use the setLevel function like this.
         if (bp_Operator.getButtonPressed(Button.Stow)) {
             s_Elevator.setLevel(Level.Stow);
+            // Doing this for the safety of the robot
+            if (s_EndEffector.getPivotTarget() == PivotTarget.AlgaeIntake) {
+                s_EndEffector.setPivot(PivotTarget.SafetyTarget);
+            }
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPosition2)) {
             s_Elevator.setLevel(Level.Coral2);

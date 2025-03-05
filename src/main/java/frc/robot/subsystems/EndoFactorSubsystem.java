@@ -4,9 +4,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.hardware.CANrange;
-
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.FovParamsConfigs;
+import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -20,6 +21,19 @@ public class EndoFactorSubsystem extends SubsystemBase {
         setMotorConfig();
         zeroDeliveryPosition();
         zeroPivotPosition();
+        s_DeliveryRange.getConfigurator().apply(
+            new CANrangeConfiguration()
+                .withProximityParams(
+                    new ProximityParamsConfigs()
+                        .withProximityThreshold(0.05)
+                        .withProximityHysteresis(0.01)
+                )
+                .withFovParams(
+                    new FovParamsConfigs()
+                        .withFOVRangeX(6.75)
+                        .withFOVRangeY(6.75)
+                )
+        );
     }
 
     private final double d_IntakeMotorSpeed = 0.125;
@@ -58,13 +72,11 @@ public class EndoFactorSubsystem extends SubsystemBase {
     private final double d_EncoderLeewayRange = 0.005;
     private final double c_DeliverySupplyCurrentLimit = 5.0;
 
-    /** The max range for when we know coral is in the Endofactor. */ 
-    private final double d_CoralDetectionRange = 0.031;
-    private final int i_CoralDetectionSamples = 3;
+    /** The max range for when we know coral is in the Endofactor. */
     private final double d_CoralIntakeTimerDuration = 5.0;
-    /** The number of enoder ticks required to injest the coral from the distance sensor. */
-    private final double d_CoralInTravel = 2.25;
-    /** The number of enoder ticks required to eject the coral from when the play presses the button. */
+    /** The number of encoder ticks required to injest the coral from the distance sensor. */
+    private final double d_CoralInTravel = 3.0;
+    /** The number of encoder ticks required to eject the coral from when the play presses the button. */
     private final double d_CoralOutTravel = 7.5;
 
     private final Timer t_CoralIntakeTimer = new Timer();
@@ -77,14 +89,12 @@ public class EndoFactorSubsystem extends SubsystemBase {
     private boolean b_IsCoralEjecting;
     private double d_TargetCoralPosition;
 
-    private int i_SuccessfulCoralDetectionSamples;
     //endregion
 
     //region Methods
     //region Coral
     public EndoFactorSubsystem intakeCoral() {
         if (!b_IsCoralIntakeDisabled) {
-            i_SuccessfulCoralDetectionSamples = 0;
             b_IsCoralIntakeDisabled = true; // Prevents the player's button press.
             b_IsCoralOutputDisabled = true; // Prevents the player's button press.
             m_DeliveryMotor.set(d_IntakeMotorSpeed);
@@ -92,7 +102,6 @@ public class EndoFactorSubsystem extends SubsystemBase {
             t_CoralIntakeTimer.start();
             b_IsCoralIntakeTimerEnabled = true; // Will start running the timer method in the command's execute method.
         }
-
         return this;
     }
 
@@ -102,7 +111,6 @@ public class EndoFactorSubsystem extends SubsystemBase {
             b_IsCoralEjecting = true; 
             m_DeliveryMotor.set(es_EjectSpeed.value);
             d_TargetCoralPosition = getDeliveryPosition() + d_CoralOutTravel;
-            i_SuccessfulCoralDetectionSamples = 0;
         }
 
         return this;
@@ -126,11 +134,6 @@ public class EndoFactorSubsystem extends SubsystemBase {
 
     public double getDeliveryPosition() {
         return m_DeliveryMotor.getPosition().getValueAsDouble();
-    }
-
-    public double getDeliveryRange() {
-        // TODO: Investigate more reliable ways to get short-range values
-        return s_DeliveryRange.getDistance().getValueAsDouble();
     }
 
     public EndoFactorSubsystem timerExecute() {
@@ -199,6 +202,10 @@ public class EndoFactorSubsystem extends SubsystemBase {
     boolean b_canGoToCoralPos = true;
     public void canGoToCoralPos(boolean allowed) {
         b_canGoToCoralPos = allowed;
+    }
+
+    public boolean hasAlgae() {
+        return (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit);
     }
     //endregion
     //endregion
@@ -272,7 +279,7 @@ public void runPivotToPose(PivotTarget target) {
     }
 
     public boolean hasCoral() {
-        return b_hasCoral;
+        return s_DeliveryRange.getIsDetected().getValue();
     }
 
     public void setEjectSpeed(EjectSpeed es) {
@@ -287,9 +294,9 @@ public void runPivotToPose(PivotTarget target) {
     @Override
     public void periodic() {
         SmartDashboard.putString("Endofactor - target position", pt_PivotTarget.name());
-        SmartDashboard.putNumber("Endofactor - range", getDeliveryRange());
         SmartDashboard.putBoolean("Endofactor - is safe?", isSafe());
         SmartDashboard.putBoolean("Endofactor - has coral?", hasCoral());
+        SmartDashboard.putNumber("Endofactor - measure", s_DeliveryRange.getDistance().getValueAsDouble());
         //SmartDashboard.putNumber("Endofactor - Delivery stator current", m_DeliveryMotor.getStatorCurrent().getValueAsDouble());
         //SmartDashboard.putNumber("Endofactor - Delivery voltage", m_DeliveryMotor.getMotorVoltage().getValueAsDouble());
         if (maxDeliveyCurrent < m_DeliveryMotor.getSupplyCurrent().getValueAsDouble()) 
@@ -305,16 +312,7 @@ public void runPivotToPose(PivotTarget target) {
         //System.out.println("DeliverySupply"+m_DeliveryMotor.getSupplyCurrent().getValueAsDouble());
 
         //runPivotToPose(pt_PivotTarget);
-        if (getDeliveryRange() < d_CoralDetectionRange) { 
-            i_SuccessfulCoralDetectionSamples++;
-            if (i_SuccessfulCoralDetectionSamples > i_CoralDetectionSamples) {
-                b_hasCoral = true;
-            }
-        }
-        else {
-            i_SuccessfulCoralDetectionSamples = 0;
-            b_hasCoral = false;
-        }
+        b_hasCoral = hasCoral();
 
         // Disable coral controls in algae mode for Operator clarity
         if (getPivotTarget() == PivotTarget.AlgaeIntake || getPivotTarget() == PivotTarget.AlgaeIntakeStow) {
