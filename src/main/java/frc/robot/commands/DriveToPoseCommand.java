@@ -16,23 +16,33 @@ public class DriveToPoseCommand extends Command {
     // The origin is the center of the field, behind the robot starting line.
     public enum Position {
         Origin(0, 0, 0),
-        Face1LeftCoral(2.662, 0, 0),
+        Face1LeftCoral(2.85, 0, 0),
         Face1Backup(2, 0, 0),
-        Algea1(0, 0, 0),
-        Algea1Backup(2, 0, 0),
-        FaceProcessor(0, 0, 0),
+        Algae1Backup(2, -0.5, 0),
+        Algae1(3.9, -0.5, 0, 0.35),
+
+        FaceProcessor(2.3, 6.55, 90),
+        
         Face1RightCoral(0, 0, 0),
         Face2LeftCoral(0, 0, 0),
         Face2RightCoral(0, 0, 0),
         Face6LeftCoral(0, 0, 0),
         Face6RightCoral(0, 0, 0),
         ;
-        public double x, y, angle;
+        public double x, y, angle, maxspeed;
         public Pose2d pose;
         Position(double x, double y, double angle) {
             this.x = x;
             this.y = y;
             this.angle = angle;
+            this.maxspeed = 1;
+            this.pose = new Pose2d(new Translation2d(x, y), Rotation2d.fromDegrees(angle));
+        }
+        Position(double x, double y, double angle, double maxspeed) {
+            this.x = x;
+            this.y = y;
+            this.angle = angle;
+            this.maxspeed = maxspeed;
             this.pose = new Pose2d(new Translation2d(x, y), Rotation2d.fromDegrees(angle));
         }
     }
@@ -40,7 +50,7 @@ public class DriveToPoseCommand extends Command {
     // 1 UNIT ~ 50 cm
 
     // The maximum Swerve speed
-    private final double c_MaxSwerveSpeed = 5.12 * 0.75; // kSpeedAt12VoltsMps desired top speed
+    private final double c_MaxSwerveSpeed = 5.12; // kSpeedAt12VoltsMps desired top speed
   	
     // The maximum Swerve rotation speed
     private final double c_MaxSwerveAngularRate = 3.0 * Math.PI; // 3/4 of a rotation per second max angular velocity
@@ -59,6 +69,7 @@ public class DriveToPoseCommand extends Command {
     private int i_Frames;
 
     // This is the pose that the robot wants to go to.
+    private Position p_Target;
     private Pose2d p_TargetPose;
 
     private double d_Forward;
@@ -71,10 +82,11 @@ public class DriveToPoseCommand extends Command {
     private SwerveDrivetrainSubsystem s_Swerve;
     private ElevatorSubsystem s_Elevator;
 
-    public DriveToPoseCommand(SwerveDrivetrainSubsystem s, ElevatorSubsystem e, Pose2d target) {
+    public DriveToPoseCommand(SwerveDrivetrainSubsystem s, ElevatorSubsystem e, Position target) {
         s_Swerve = s;
         s_Elevator = e;
-        p_TargetPose = target;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
+        p_Target = target;
+        p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
         addRequirements(s_Swerve);
     }
     
@@ -97,10 +109,10 @@ public class DriveToPoseCommand extends Command {
             d_SwerveRamp = Math.max(d_SwerveRamp-1/c_AccelTime,0);
         }
 
-        double elevatorSpeedReduction = (s_Elevator.getEncoderValue()/Level.Coral4.value)*0.75; // From 0 to 1 (0% to 100%), how much do we reduce swerve speed?
+        double elevatorSpeedReduction = (s_Elevator.getEncoderValue()/Level.Coral4.value)*0.35; // From 0 to 1 (0% to 100%), how much do we reduce swerve speed?
         s_Swerve.setControl(drive_field.
-            withVelocityX(d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed) // Drive forward with negative Y (forward)
-            .withVelocityY(d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed) // Drive left with negative X (left)
+            withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
+            .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
             .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
         );
     }
@@ -109,6 +121,15 @@ public class DriveToPoseCommand extends Command {
     public boolean isFinished() {
         i_Frames++;
         return (Math.abs(d_Forward) < c_SwerveRampDeadzone && Math.abs(d_Strafe) < c_SwerveRampDeadzone && Math.abs(d_Rotate) < c_SwerveRampDeadzone && i_Frames > 5);
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        s_Swerve.setControl(drive_field.
+            withVelocityX(0)
+            .withVelocityY(0)
+            .withRotationalRate(0)
+        );
     }
 
     // This is a bad function name.

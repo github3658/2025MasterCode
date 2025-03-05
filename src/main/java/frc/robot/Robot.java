@@ -11,9 +11,11 @@ import frc.robot.subsystems.EndoFactorSubsystem.PivotTarget;
 import frc.robot.ButtonPanel.Button;
 import frc.robot.commands.*; // This imports all of our commands.
 import frc.robot.commands.DriveToPoseCommand.Position;
+import frc.robot.commands.autonomous.AutonomousPrograms;
 import frc.robot.commands.autonomous.ButtonPanelPressCommand;
+import frc.robot.commands.autonomous.WaitForDelay;
 import frc.robot.commands.autonomous.WaitForTrue;
-
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -49,13 +51,14 @@ public class Robot extends TimedRobot {
     s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
     s_ClimbSubsystem.setDefaultCommand(new ClimbDefaultCommand(s_ClimbSubsystem, bp_Operator));
     s_Elevator.setLocked(true);
+    CameraServer.startAutomaticCapture();
   }
-
-  int test;
-  boolean test2;
-
+  
   @Override
   public void robotPeriodic() {
+    SmartDashboard.putNumber("-BOT X", s_Swerve.getState().Pose.getX());
+    SmartDashboard.putNumber("-BOT Y", s_Swerve.getState().Pose.getY());
+    SmartDashboard.putNumber("-BOT ROTATION", s_Swerve.getState().Pose.getRotation().getDegrees());
     CommandScheduler.getInstance().run();
     SmartDashboard.putNumber("Limelight Target X", LimelightHelpers.getTX(""));
     //SmartDashboard.putNumber("PivotEncoder2", s_EndEffector.getPivotPosition());
@@ -107,35 +110,10 @@ public class Robot extends TimedRobot {
   public void autonomousInit() {
     // We'll count the reef faces from 1 to 6
 
-    new ParallelCommandGroup(
-      new ParallelCommandGroup(
-        new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true).withDeadline(null),
-        new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator).ignoringDisable(true)
-      ),
-      new SequentialCommandGroup(
-        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Face1LeftCoral.pose),
-        new ButtonPanelPressCommand(Button.ElevatorPosition4, true),
-        new WaitForTrue(() -> s_Elevator.isFinished()),
-        new ButtonPanelPressCommand(Button.CoralOut, true),
-        new WaitForTrue(() -> s_EndEffector.isFinished()),
-        new ButtonPanelPressCommand(Button.CoralOut, true),
-        new ButtonPanelPressCommand(Button.Stow, true),
-        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Face1Backup.pose)
-        // new ButtonPanelPressCommand(Button.ElevatorPosition2, true),
-        // new ParallelCommandGroup (
-        //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Algea1.pose),
-        //   new ButtonPanelPressCommand(Button.AlgaeIn, true)
-        // ),
-        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Algea1Backup.pose),
-        // new ParallelCommandGroup(
-        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.FaceProcessor.pose),
-        // new ButtonPanelPressCommand(Button.Stow, true)
-        // ),
-        // new ButtonPanelPressCommand(Button.AlgaeIn, false),
-        // new ButtonPanelPressCommand(Button.AlgaeOut, true),
-        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin.pose)
-      )
-    ).schedule();
+    String msg = SmartDashboard.getString("DB/String 0", "center");
+    if (msg.equalsIgnoreCase("center")) {
+      AutonomousPrograms.auto_Center(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
+    }
 
     // REEF FACE 1
     // new SequentialCommandGroup(
