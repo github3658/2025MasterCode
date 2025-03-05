@@ -109,10 +109,18 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     // We'll count the reef faces from 1 to 6
+    s_Swerve.resetPose(new Pose2d());
 
     String msg = SmartDashboard.getString("DB/String 0", "center");
     if (msg.equalsIgnoreCase("center")) {
       AutonomousPrograms.auto_Center(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
+    }
+
+    else if (msg.equalsIgnoreCase("leave") || msg.equalsIgnoreCase(""))  {
+      AutonomousPrograms.auto_Line(s_Swerve, s_Elevator).schedule();
+    }
+    else if (msg.equalsIgnoreCase("right")) {
+      AutonomousPrograms.auto_Right(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
     }
 
     // REEF FACE 1
