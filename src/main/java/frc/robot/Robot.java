@@ -13,7 +13,7 @@ import frc.robot.commands.*; // This imports all of our commands.
 import frc.robot.commands.DriveToPoseCommand.Position;
 import frc.robot.commands.autonomous.ButtonPanelPressCommand;
 import frc.robot.commands.autonomous.WaitForTrue;
-
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -49,11 +49,9 @@ public class Robot extends TimedRobot {
     s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
     s_ClimbSubsystem.setDefaultCommand(new ClimbDefaultCommand(s_ClimbSubsystem, bp_Operator));
     s_Elevator.setLocked(true);
+    CameraServer.startAutomaticCapture();
   }
-
-  int test;
-  boolean test2;
-
+  
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
@@ -121,7 +119,19 @@ public class Robot extends TimedRobot {
         new ButtonPanelPressCommand(Button.CoralOut, true),
         new ButtonPanelPressCommand(Button.Stow, true),
         new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Face1Backup.pose),
-        new ButtonPanelPressCommand(Button.Stow, true)
+        new ButtonPanelPressCommand(Button.ElevatorPosition2, true),
+        new ParallelCommandGroup(
+          new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Algae1.pose),
+          new ButtonPanelPressCommand(Button.AlgaeIn, true)
+        ),
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Algae1Backup.pose),
+        new ParallelCommandGroup(
+          new DriveToPoseCommand(s_Swerve, s_Elevator, Position.FaceProcessor.pose),
+          new ButtonPanelPressCommand(Button.Stow, true)
+        ),
+        new ButtonPanelPressCommand(Button.AlgaeIn, false),
+        new ButtonPanelPressCommand(Button.AlgaeOut, true),
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin.pose)
       )
     ).schedule();
 

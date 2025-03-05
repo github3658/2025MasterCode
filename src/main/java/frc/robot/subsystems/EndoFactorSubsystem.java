@@ -6,6 +6,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.hardware.CANrange;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -33,7 +34,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
         }
     }
     private EjectSpeed es_EjectSpeed = EjectSpeed.Level1;
-    private final double d_PivotMotorSpeed = 0.08;
+    private final double d_PivotMotorSpeed = 0.1;
     private final double c_PivotSupplyCurrentLimit = 2.5;
     private boolean b_hasCoral;
     
@@ -58,7 +59,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
     private final double c_DeliverySupplyCurrentLimit = 5.0;
 
     /** The max range for when we know coral is in the Endofactor. */ 
-    private final double d_CoralDetectionRange = 0.04;
+    private final double d_CoralDetectionRange = 0.031;
     private final int i_CoralDetectionSamples = 3;
     private final double d_CoralIntakeTimerDuration = 5.0;
     /** The number of enoder ticks required to injest the coral from the distance sensor. */
@@ -128,6 +129,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
     }
 
     public double getDeliveryRange() {
+        // TODO: Investigate more reliable ways to get short-range values
         return s_DeliveryRange.getDistance().getValueAsDouble();
     }
 
@@ -230,7 +232,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
 public void runPivotToPose(PivotTarget target) {
     double d_CurrentPose = getPivotPosition();
     double c_Current = m_PivotMotor.getSupplyCurrent().getValueAsDouble();
-    double speed = c_Current > c_PivotSupplyCurrentLimit ? 0 : Math.min(Math.max((target.value - d_CurrentPose) * 75, -1), 1);
+    double speed = c_Current > c_PivotSupplyCurrentLimit ? 0 : Math.min(Math.max((target.value - d_CurrentPose) * 35, -1), 1);
 
     m_PivotMotor.set(speed * d_PivotMotorSpeed);
 }
@@ -285,6 +287,7 @@ public void runPivotToPose(PivotTarget target) {
     @Override
     public void periodic() {
         SmartDashboard.putString("Endofactor - target position", pt_PivotTarget.name());
+        SmartDashboard.putNumber("Endofactor - range", getDeliveryRange());
         SmartDashboard.putBoolean("Endofactor - is safe?", isSafe());
         SmartDashboard.putBoolean("Endofactor - has coral?", hasCoral());
         //SmartDashboard.putNumber("Endofactor - Delivery stator current", m_DeliveryMotor.getStatorCurrent().getValueAsDouble());
@@ -298,8 +301,8 @@ public void runPivotToPose(PivotTarget target) {
         SmartDashboard.putNumber("MaxDeliveryCurrent", maxDeliveyCurrent);
         SmartDashboard.putNumber("MaxPivotCurrent", maxPivotCurrent);
         
-        System.out.println("PivotSupply"+m_PivotMotor.getSupplyCurrent().getValueAsDouble());
-        System.out.println("DeliverySupply"+m_DeliveryMotor.getSupplyCurrent().getValueAsDouble());
+        //System.out.println("PivotSupply"+m_PivotMotor.getSupplyCurrent().getValueAsDouble());
+        //System.out.println("DeliverySupply"+m_DeliveryMotor.getSupplyCurrent().getValueAsDouble());
 
         //runPivotToPose(pt_PivotTarget);
         if (getDeliveryRange() < d_CoralDetectionRange) { 

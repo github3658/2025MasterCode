@@ -18,7 +18,10 @@ public class DriveToPoseCommand extends Command {
         Origin(0, 0, 0),
         Face1LeftCoral(2.662, 0, 0),
         Face1Backup(2, 0, 0),
-
+        Algae1(0, 0, 0),
+        Algae1Backup(0, 0, 0),
+        FaceProcessor(0, 0, 0),
+        
         Face1RightCoral(0, 0, 0),
         Face2LeftCoral(0, 0, 0),
         Face2RightCoral(0, 0, 0),
