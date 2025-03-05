@@ -115,6 +115,13 @@ public class Robot extends TimedRobot {
       AutonomousPrograms.auto_Center(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
     }
 
+    else if (msg.equalsIgnoreCase("leave") || msg.equalsIgnoreCase(""))  {
+      AutonomousPrograms.auto_Line(s_Swerve, s_Elevator).schedule();
+    }
+    else if (msg.equalsIgnoreCase("right")) {
+      AutonomousPrograms.auto_Right(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
+    }
+
     // REEF FACE 1
     // new SequentialCommandGroup(
 		//   new DriveToPose(s_Swerve, new Pose2d(new Translation2d(3, 0), new Rotation2d()))

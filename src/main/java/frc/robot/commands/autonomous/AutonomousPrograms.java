@@ -13,6 +13,36 @@ import frc.robot.commands.ElevatorDefaultCommand;
 import frc.robot.commands.EndoFactorDefaultCommand;
 
 public class AutonomousPrograms {
+    public static ParallelCommandGroup auto_Right(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator, ButtonPanel bp_Operator, EndoFactorSubsystem s_EndEffector) {
+      return new ParallelCommandGroup(
+      new ParallelCommandGroup(
+              new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true).withDeadline(null),
+              new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator).ignoringDisable(true)
+            ),
+
+      new SequentialCommandGroup (
+            new ParallelCommandGroup(
+              new DriveToPoseCommand(s_Swerve, s_Elevator, Position.RightCoral)
+            //   new ButtonPanelPressCommand(Button.ElevatorPosition4, true)
+              )
+            //   new WaitForTrue(() -> s_Elevator.isFinished()),
+            //   new WaitForTrue(() -> s_EndEffector.isFinished()),
+            //   new ButtonPanelPressCommand(Button.CoralOut, true),
+            //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStationBackup),
+            //   new ParallelCommandGroup(
+            //     new ButtonPanelPressCommand(Button.Stow, true),
+            //     new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStation)
+            //   )
+            )
+        );
+    }
+
+    public static SequentialCommandGroup auto_Line(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {
+      return new SequentialCommandGroup(
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Pullout)
+      );
+    }
+
     public static ParallelCommandGroup auto_Center(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator, ButtonPanel bp_Operator, EndoFactorSubsystem s_EndEffector) {
         return new ParallelCommandGroup(
             new ParallelCommandGroup(
