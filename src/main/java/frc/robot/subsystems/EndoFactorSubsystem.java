@@ -12,13 +12,23 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
+import frc.robot.subsystems.core.Pivot.PivotCore;
+import frc.robot.subsystems.core.Pivot.PivotTargets;
 
 public class EndoFactorSubsystem extends SubsystemBase {
+
+    private final PivotCore _pivotCore = new PivotCore();
+
     public EndoFactorSubsystem() {
-        pt_PivotTarget = PivotTarget.CoralIntake;
-        setMotorConfig();
+        _pivotCore.setPivot(PivotTargets.CoralIntake)
+            .getMotor().zeroPosition();
+
+
+
+        // pt_PivotTarget = PivotTarget.CoralIntake;
+        // setMotorConfig();
         zeroDeliveryPosition();
-        zeroPivotPosition();
+        // zeroPivotPosition();
     }
 
     private final double d_IntakeMotorSpeed = 0.125;
@@ -33,7 +43,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
         }
     }
     private EjectSpeed es_EjectSpeed = EjectSpeed.Level1;
-    private final double d_PivotMotorSpeed = 0.0625;
+    // private final double d_PivotMotorSpeed = 0.0625;
     private boolean b_hasCoral;
     
     private void setMotorConfig() {
