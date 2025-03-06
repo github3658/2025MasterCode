@@ -66,7 +66,7 @@ public class Robot extends TimedRobot {
 
     // If the elevator wants to move, take the End Effector out of unsafe positions.
     if (!s_Elevator.isFinished() && !s_EndEffector.isSafe()) {
-      System.out.println("Move to safety position");
+      //System.out.println("Move to safety position");
       s_EndEffector.setPivot(PivotTarget.SafetyTarget);
     }
 
@@ -77,11 +77,11 @@ public class Robot extends TimedRobot {
     
     // Unlock and lock the elevator depending on whether the endeffector is in safety
     if (s_Elevator.getLocked() && s_EndEffector.isSafe() && !s_EndEffector.isPivotTarget(PivotTarget.CoralIntake)) {
-      System.out.println("Unlock Elevator");
+      //System.out.println("Unlock Elevator");
       s_Elevator.setLocked(false);
     }
     else if (!s_Elevator.getLocked() && !s_EndEffector.isSafe()) {
-      System.out.println("Lock Elevator");
+      //System.out.println("Lock Elevator");
       s_Elevator.setLocked(true);
     }
 
@@ -95,6 +95,16 @@ public class Robot extends TimedRobot {
     else {
       s_LED.setColor(Color.Alliance);
     }
+
+    // POSE TESTING //
+    if (xb_Driver.getYButtonPressed()) {
+      new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ACoral, 0.05).schedule();
+    }
+
+    if (xb_Driver.getBButtonPressed()) {
+      new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin, 0.05).schedule();
+    }
+    // // // // // //
   }
 
   @Override

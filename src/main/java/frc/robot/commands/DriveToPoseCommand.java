@@ -6,6 +6,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem.Level;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -15,24 +16,25 @@ public class DriveToPoseCommand extends Command {
     // These are the positions the robot should drive to.
     // The origin is the center of the field, behind the robot starting line.
     public enum Position {
+        // Can be used from any starting position
         Origin(0, 0, 0),
         Pullout(0.5, 0, 0),
-        Face1LeftCoral(2.85, 0, 0),
-        Face1Backup(2, 0, 0),
-        Algae1Backup(2, -0.5, 0),
-        Algae1(3.9, -0.5, 0, 0.35),
-        RightCoral(4.544, -5.189, -58.9),
-        CoralStationBackup(0, 0, 0, 0.35),
-        CoralStation(12.646, 1.887, -135.214, 0.35),
 
-
-        FaceProcessor(2.5, 6.25, 90),
+        // CENTER ONLY
+        Reef10ACoral(2.875, 0, 0),
+        Reef10ABackup(2, 0, 0),
+        Reef10AlgaeBackup(2, -0.5, 0),
+        Reef10Algae(3.9, -0.5, 0, 0.35),
+        FaceProcessor(2.85, 6.3, 90),
+        FleeFromProcessor(5.0, 6.0, 90),
         
-        Face1RightCoral(0, 0, 0),
-        Face2LeftCoral(0, 0, 0),
-        Face2RightCoral(0, 0, 0),
-        Face6LeftCoral(0, 0, 0),
-        Face6RightCoral(0, 0, 0),
+        // RIGHT ONLY
+        Reef9ACoral(4.544, -5.189, -58.9),
+        CoralStationBackup(11.861, -2.722, -125.75),
+        CoralStation(12.90, -1.70, -125.75),
+        Reef8ACoral(7.1, -6.025, -119.9),
+        Reef8ABackup(8.1, -5.025, -119.9),
+
         ;
         public double x, y, angle, maxspeed;
         public Pose2d pose;
@@ -64,7 +66,7 @@ public class DriveToPoseCommand extends Command {
     private final double c_AccelTime = 25.0;
 
     // If our speed is less than this value, we should stop.
-    private final double c_SwerveRampDeadzone = 0.1;
+    private double c_SwerveRampDeadzone = 0.1;
 
     // This is a multiplier for the Swerve speed, so we accelerate and slow down before switching targets.
     private double d_SwerveRamp;
@@ -94,6 +96,15 @@ public class DriveToPoseCommand extends Command {
         p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
         addRequirements(s_Swerve);
     }
+
+    public DriveToPoseCommand(SwerveDrivetrainSubsystem s, ElevatorSubsystem e, Position target, double deadzone) {
+        s_Swerve = s;
+        s_Elevator = e;
+        p_Target = target;
+        p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
+        c_SwerveRampDeadzone = deadzone;
+        addRequirements(s_Swerve);
+    }
     
     @Override
     public void initialize() {
@@ -116,8 +127,8 @@ public class DriveToPoseCommand extends Command {
 
         double elevatorSpeedReduction = (s_Elevator.getEncoderValue()/Level.Coral4.value)*0.35; // From 0 to 1 (0% to 100%), how much do we reduce swerve speed?
         s_Swerve.setControl(drive_field.
-            withVelocityX(d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
-            .withVelocityY(d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
+            withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
+            .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
             .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
         );
     }
@@ -135,11 +146,16 @@ public class DriveToPoseCommand extends Command {
             .withVelocityY(0)
             .withRotationalRate(0)
         );
+        System.out.println("Reached " + p_Target.name());
+        System.out.println("X " + s_Swerve.getState().Pose.getX());
+        System.out.println("Y " + s_Swerve.getState().Pose.getY());
+        System.out.println("ROT " + s_Swerve.getState().Pose.getRotation().getDegrees());
+        //System.out.println("AT " + DriverStation.getMatchTime());
     }
 
     // This is a bad function name.
     // It converts a distance to a reasonable forward/strafe speed.
     private double toReasonableValue(double dist) {
-        return Math.min(Math.max(dist/2,-0.5),0.5);
+        return Math.min(Math.max(dist/2,-0.65),0.65);
     }
 }

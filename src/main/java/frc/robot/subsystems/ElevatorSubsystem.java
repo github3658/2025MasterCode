@@ -67,7 +67,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (!b_locked) {
-            double speed = (getTargetLevel().value - getEncoderValue()) * 0.05; // Set speed to encoder difference
+            double speed = (getTargetLevel().value - getEncoderValue()) * 0.10; // Set speed to encoder difference
+            if (getTargetLevel().value < getEncoderValue()) {
+                speed = (getTargetLevel().value - getEncoderValue()) * 0.05;
+            }
             speed = Math.min(Math.max(speed, -0.75), 0.75); // Clamp speed
             if (!dio_LimitSwitch.get()) {
                 m_LeftElevatorMotor.set(0);
@@ -93,7 +96,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             leftSupply = l;
             SmartDashboard.putNumber("Elevator - Left Supply", leftSupply);
             System.out.println("left "+leftSupply);
-            if (leftSupply > 47 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
+            if (leftSupply > 40 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
                 m_LeftElevatorMotor.setPosition(0, 0);
                 m_RightElevatorMotor.setPosition(0, 0);
                 leftSupply = 0;
@@ -104,6 +107,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Elevator - Right Supply", rightSupply);
             rightSupply = r;
             System.out.println("right "+rightSupply);
+            if (rightSupply > 40 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
+                m_LeftElevatorMotor.setPosition(0, 0);
+                m_RightElevatorMotor.setPosition(0, 0);
+                rightSupply = 0;
+            }
         }
     }
 
