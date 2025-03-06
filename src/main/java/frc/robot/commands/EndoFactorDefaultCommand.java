@@ -62,14 +62,17 @@ public class EndoFactorDefaultCommand extends Command {
 
         // Pivot Control
         if (bp_Operator.getButtonPressed(Button.ClawPositionAlgae)) {
-            System.out.println("AlgaePose");
+            //System.out.println("AlgaePose");
             s_EndEffector.setPivot(pt_AlgaeTarget);
             //s_EndEffector.canGoToCoralPos(false);
         }
         else if (bp_Operator.getButtonPressed(Button.ClawPositionCoral)) {
-            System.out.println("CoralPose");
-            if (s_EndEffector.canGoToCoralPos()) {
+            //System.out.println("CoralPose");
+            if (s_Elevator.getTargetLevel() == Level.Stow && s_Elevator.isFinished()) {
                 s_EndEffector.setPivot(EndoFactorSubsystem.PivotTarget.CoralIntake);
+            }
+            else {
+                s_EndEffector.setPivot(EndoFactorSubsystem.PivotTarget.SafetyTarget);
             }
         }
 
@@ -83,7 +86,7 @@ public class EndoFactorDefaultCommand extends Command {
 
         // Intake
         if (bp_Operator.getButton(Button.AlgaeIn)) {
-            System.out.println("AlgaeIn");
+            //System.out.println("AlgaeIn");
             if (s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntake) || s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntakeStow)) {
                 s_EndEffector.intakeAlgae(); // TODO: Check motor current
             }
@@ -92,7 +95,7 @@ public class EndoFactorDefaultCommand extends Command {
             }
         }
         else if (bp_Operator.getButtonPressed(Button.CoralIn) && !s_EndEffector.getIsIntakeDisabled() && s_Elevator.getElevatorLevel() == Level.Stow) {
-            System.out.println("Coral In");
+            //System.out.println("Coral In");
             s_EndEffector.intakeCoral();
         }
 
@@ -101,7 +104,7 @@ public class EndoFactorDefaultCommand extends Command {
 
         // Eject
         if (bp_Operator.getButton(Button.AlgaeOut)) {
-            System.out.println("Algae Out");
+            //System.out.println("Algae Out");
             if (s_EndEffector.isPivotTarget(EndoFactorSubsystem.PivotTarget.AlgaeIntake) || s_EndEffector.isPivotTarget(EndoFactorSubsystem.PivotTarget.AlgaeIntakeStow)) {
                 s_EndEffector.ejectAlgae();
                 s_EndEffector.canGoToCoralPos(true);
@@ -111,7 +114,7 @@ public class EndoFactorDefaultCommand extends Command {
             }
         }
         else if (bp_Operator.getButtonPressed(Button.CoralOut)) {
-            System.out.println("Coral Out");
+            //System.out.println("Coral Out");
             if (s_EndEffector.isPivotTarget(pt_IdealTarget)) {
                 s_EndEffector.ejectCoral();
             }
