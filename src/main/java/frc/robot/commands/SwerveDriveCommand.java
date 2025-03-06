@@ -3,6 +3,7 @@ package frc.robot.commands;
 import com.ctre.phoenix6.swerve.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,6 +30,7 @@ public class SwerveDriveCommand extends Command {
 
     @Override
     public void initialize() {
+        // s_Swerve.resetPose(new Pose2d()); TODO: Remove later.
     }
 
     @Override
@@ -71,6 +73,7 @@ public class SwerveDriveCommand extends Command {
         SmartDashboard.putNumber("SWERVE - Rotation", s_Swerve.getState().Pose.getRotation().getDegrees());
 
     }
+
 
     @Override
     public boolean isFinished() {

@@ -21,12 +21,12 @@ public class DriveToPoseCommand extends Command {
         Face1Backup(2, 0, 0),
         Algae1Backup(2, -0.5, 0),
         Algae1(3.9, -0.5, 0, 0.35),
-        RightCoral(4.45, -5.223, -60.240),
-        CoralStationBackup(4.75, 0, 0, 0.35),
+        RightCoral(4.544, -5.189, -58.9),
+        CoralStationBackup(0, 0, 0, 0.35),
         CoralStation(12.646, 1.887, -135.214, 0.35),
 
 
-        FaceProcessor(2.3, 6.55, 90),
+        FaceProcessor(2.5, 6.25, 90),
         
         Face1RightCoral(0, 0, 0),
         Face2LeftCoral(0, 0, 0),
@@ -116,8 +116,8 @@ public class DriveToPoseCommand extends Command {
 
         double elevatorSpeedReduction = (s_Elevator.getEncoderValue()/Level.Coral4.value)*0.35; // From 0 to 1 (0% to 100%), how much do we reduce swerve speed?
         s_Swerve.setControl(drive_field.
-            withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
-            .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
+            withVelocityX(d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
+            .withVelocityY(d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
             .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
         );
     }

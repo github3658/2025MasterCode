@@ -115,12 +115,10 @@ public class Robot extends TimedRobot {
     if (msg.equalsIgnoreCase("center")) {
       AutonomousPrograms.auto_Center(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
     }
-
-    else if (msg.equalsIgnoreCase("leave") || msg.equalsIgnoreCase(""))  {
-      AutonomousPrograms.auto_Line(s_Swerve, s_Elevator).schedule();
-    }
     else if (msg.equalsIgnoreCase("right")) {
       AutonomousPrograms.auto_Right(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
+    } else {
+      AutonomousPrograms.auto_Line(s_Swerve, s_Elevator).schedule();
     }
 
     // REEF FACE 1

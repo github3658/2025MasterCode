@@ -30,7 +30,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         Coral4(124),
         Algea1(54),
         Algea2(87),
-        LevelBarge(8);
+        LevelBarge(124);
         public final double value;
         Level(double value) {
             this.value = value;
@@ -81,6 +81,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         else {
             m_LeftElevatorMotor.set(0);
         }
+
+        SmartDashboard.putNumber("Elevator Position", m_LeftElevatorMotor.getPosition().getValueAsDouble());
         SmartDashboard.putBoolean("Elevator - Finished", isFinished());
         SmartDashboard.putBoolean("Elevator - Locked", getLocked());
         SmartDashboard.putString("Elevator - Level TARGET", getTargetLevel().name());
