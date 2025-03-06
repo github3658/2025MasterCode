@@ -35,6 +35,13 @@ public class DriveToPoseCommand extends Command {
         Reef8ACoral(7.1, -6.025, -119.9),
         Reef8ABackup(8.1, -5.025, -119.9),
 
+
+        // LEFT ONLY
+        Reef11ACoral(4.544, 5.189, 58.9),
+        invCoralStationBackup(11.861, 2.722, 125.75),
+        invCoralStation(12.90, 1.70, 125.75),
+        Reef12ACoral(7.1, 6.025, 119.9),
+        Reef12ABackup(8.1, 5.025, 119.9),
         ;
         public double x, y, angle, maxspeed;
         public Pose2d pose;
