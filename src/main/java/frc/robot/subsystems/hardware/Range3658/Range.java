@@ -1,4 +1,4 @@
-package frc.robot.subsystems.hardware;
+package frc.robot.subsystems.hardware.Range3658;
 
 import com.ctre.phoenix6.hardware.CANrange;
 
@@ -9,8 +9,12 @@ public class Range {
     private int _sampleCount = 1;
     private int _actualCount = 0;
 
-    public Range(int deviceId, String canbus) {
+    Range(int deviceId, String canbus) {
         _range = new CANrange(deviceId, canbus);
+    }
+
+    CANrange getCaNrange() {
+        return _range;
     }
 
     public Range setDetectionRange(double range) {
@@ -39,9 +43,7 @@ public class Range {
     /** Will read the sensors distance. When in range it will increment the actualCount. If it counts up to the sample count it will flagged isInRange */
     public Range read() {
         if (_actualCount != _sampleCount) {
-            double distance = _range.getDistance().getValueAsDouble();
-
-            if (distance <= _detectionRange) {
+            if (isDetected()) {
                 _actualCount++; 
             } else {
                 _actualCount = 0;
@@ -59,5 +61,13 @@ public class Range {
 
     public boolean isInRange() {
         return _actualCount == _sampleCount;
+    }
+
+    public double getDistance() {
+        return _range.getDistance().getValueAsDouble();
+    }
+
+    public boolean isDetected() {
+        return _range.getIsDetected().getValue();
     }
 }

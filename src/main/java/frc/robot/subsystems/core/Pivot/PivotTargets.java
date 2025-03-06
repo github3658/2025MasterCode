@@ -7,7 +7,7 @@ public enum PivotTargets {
     Level2AndLevel3(-0.366),
     Level4(-0.243),
     AlgaeIntake(0.128);
-    double value;
+    public double value;
     PivotTargets(double value) {
         this.value = value;
     }

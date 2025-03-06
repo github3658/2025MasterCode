@@ -9,28 +9,28 @@ import frc.robot.subsystems.hardware.Motor3658.MotorBuilder;
 public class PivotCore {
     private final Motor _motor = new MotorBuilder()
         .setNeutralMode(NeutralModeValue.Brake)
-        .build(Config.kPivotMotorId, Config.kPivotEncoderId, Config.kCanbus)
+        .build(Config.kPivotMotorId, Config.kCanbus)
+        .useEncoder(Config.kPivotEncoderId)
         .setSupplyCurrentLimit(2.5)
-        .setMaxSpeed(0.0625)
+        .setMaxSpeed(0.1)
         .setPositionRange(0.004);
 
     private PivotTargets _pivotTarget;
-    private boolean _hasCoral;
 
     public Motor getMotor() { return _motor; }
 
     /** Will be safe if the endofactor is move up enough to clear the bar when the elevator runs. */
     public boolean isSafe() {
-        return(_motor.getCurrentPosition() >= PivotTargets.SafetyTarget.value - _motor.getPositionRange());
+        return (_motor.getCurrentPosition() >= PivotTargets.SafetyTarget.value - _motor.getPositionRange());
     }
 
     public boolean isFinished() {
-        return(_motor.getCurrentPosition() >= getCurrentTarget().value - _motor.getPositionRange() 
-            && _motor.getCurrentPosition() <= getCurrentTarget().value + _motor.getPositionRange());
+        return _motor.isAtPosition();
     }
 
     public PivotCore setPivot(PivotTargets target) {
         _pivotTarget = target;
+        _motor.setTargetPosition(target.value);
         return this;
     }
 
@@ -48,7 +48,12 @@ public class PivotCore {
         return _pivotTarget;
     }
 
-    public boolean hasCoral() {
-        return _hasCoral;
-    }
+    // public PivotCore setCanGoToCoralPos(boolean value) {
+    //     //private booean canGoToCorelPost = false;
+    //     return this;
+    // }
+
+    // public boolean getCanGoToCoralPos() {
+    //     return true;
+    // }
 }
