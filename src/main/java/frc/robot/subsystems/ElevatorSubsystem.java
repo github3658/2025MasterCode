@@ -62,6 +62,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
 
+    double leftSupply;
+    double rightSupply;
     @Override
     public void periodic() {
         if (!b_locked) {
@@ -86,6 +88,23 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putString("Elevator - Level TARGET", getTargetLevel().name());
         SmartDashboard.putString("Elevator - Level CURRENT", getElevatorLevel().name());
         SmartDashboard.putNumber("Elevator - Encoder Error", getTargetLevel().value - getEncoderValue());
+        double l = m_LeftElevatorMotor.getSupplyCurrent().getValueAsDouble();
+        if (Math.abs(l) > Math.abs(leftSupply)) {
+            leftSupply = l;
+            SmartDashboard.putNumber("Elevator - Left Supply", leftSupply);
+            System.out.println("left "+leftSupply);
+            if (leftSupply > 47 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
+                m_LeftElevatorMotor.setPosition(0, 0);
+                m_RightElevatorMotor.setPosition(0, 0);
+                leftSupply = 0;
+            }
+        }   
+        double r = m_RightElevatorMotor.getSupplyCurrent().getValueAsDouble();
+        if (Math.abs(r) > Math.abs(rightSupply)) {
+            SmartDashboard.putNumber("Elevator - Right Supply", rightSupply);
+            rightSupply = r;
+            System.out.println("right "+rightSupply);
+        }
     }
 
     /**
@@ -101,7 +120,15 @@ public class ElevatorSubsystem extends SubsystemBase {
      * @return
      */
     public double getEncoderValue() {
-        return m_LeftElevatorMotor.getPosition().getValueAsDouble();
+        double target = getTargetLevel().value;
+        double left = m_LeftElevatorMotor.getPosition().getValueAsDouble();
+        double right = m_RightElevatorMotor.getPosition().getValueAsDouble();
+        if (Math.abs(target - left) < Math.abs(target - right)) {
+            return left;
+        }
+        else {
+            return right;
+        }
     }
 
     /**
