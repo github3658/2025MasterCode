@@ -42,6 +42,8 @@ public class DriveToPoseCommand extends Command {
         invCoralStation(12.90, 1.70, 125.75),
         Reef12ACoral(7.1, 6.025, 119.9),
         Reef12ABackup(8.1, 5.025, 119.9),
+// TODO: Check in practice field for alignment.
+
         ;
         public double x, y, angle, maxspeed;
         public Pose2d pose;
