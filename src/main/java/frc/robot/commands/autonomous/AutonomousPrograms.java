@@ -23,12 +23,12 @@ public class AutonomousPrograms {
       new SequentialCommandGroup (
             new ParallelCommandGroup(
               new DriveToPoseCommand(s_Swerve, s_Elevator, Position.RightCoral)
-            //   new ButtonPanelPressCommand(Button.ElevatorPosition4, true)
+              , new ButtonPanelPressCommand(Button.ElevatorPosition4, true)
               )
-            //   new WaitForTrue(() -> s_Elevator.isFinished()),
-            //   new WaitForTrue(() -> s_EndEffector.isFinished()),
-            //   new ButtonPanelPressCommand(Button.CoralOut, true),
-            //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStationBackup),
+              , new WaitForTrue(() -> s_Elevator.isFinished())
+              , new WaitForTrue(() -> s_EndEffector.isFinished())
+              , new ButtonPanelPressCommand(Button.CoralOut, true)
+              , new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStationBackup)
             //   new ParallelCommandGroup(
             //     new ButtonPanelPressCommand(Button.Stow, true),
             //     new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStation)
