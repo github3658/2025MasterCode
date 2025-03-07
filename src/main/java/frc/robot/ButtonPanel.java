@@ -66,4 +66,16 @@ public class ButtonPanel {
     public void setIndicatorLight(Button button, boolean on) {
         button_panel.setOutput(button.indicator, on);
     }
+
+    public void AlgeaCancel() { 
+        Button.AlgaeIn.pressed = false;
+        System.out.println("AlgeaCanceled");
+    }
+    
+    public void AutonCancel() {
+        for (Button panel : Button.values()) {
+            panel.pressed = false;
+        }
+        System.out.println("ButtonsCanceled");
+    }
 }

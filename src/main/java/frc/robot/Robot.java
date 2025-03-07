@@ -216,11 +216,13 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+      bp_Operator.AlgeaCancel();
+      bp_Operator.AutonCancel();
+  }
 
   @Override
-  public void teleopInit() {
-  }
+  public void teleopInit() {}
 double counter = 0.0;
   @Override
   public void teleopPeriodic() {

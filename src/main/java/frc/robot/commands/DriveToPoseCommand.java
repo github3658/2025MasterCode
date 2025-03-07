@@ -21,7 +21,7 @@ public class DriveToPoseCommand extends Command {
         Pullout(0.5, 0, 0),
 
         // CENTER ONLY
-        Reef10ACoral(2.875, 0, 0),
+        Reef10ACoral(2.875, 0, 0), 
         Reef10ABackup(2, 0, 0),
         Reef10AlgaeBackup(2, -0.5, 0),
         Reef10Algae(3.9, -0.5, 0, 0.35),
