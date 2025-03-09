@@ -1,5 +1,6 @@
 package frc.robot.commands.autonomous;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.ButtonPanel;
@@ -13,6 +14,20 @@ import frc.robot.commands.ElevatorDefaultCommand;
 import frc.robot.commands.EndoFactorDefaultCommand;
 
 public class AutonomousPrograms {
+    public static SequentialCommandGroup auto_Test1(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {
+      return new SequentialCommandGroup(
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTest)
+        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurn)
+      );
+    }
+
+    public static SequentialCommandGroup auto_Test2(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {
+      return new SequentialCommandGroup(
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurnTest)
+        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurn)
+      );
+    }
+
     public static ParallelCommandGroup auto_Right(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator, ButtonPanel bp_Operator, EndoFactorSubsystem s_EndEffector) {
       return new ParallelCommandGroup(
         new ParallelCommandGroup(

@@ -12,9 +12,6 @@ import frc.robot.ButtonPanel.Button;
 import frc.robot.commands.*; // This imports all of our commands.
 import frc.robot.commands.DriveToPoseCommand.Position;
 import frc.robot.commands.autonomous.AutonomousPrograms;
-import frc.robot.commands.autonomous.ButtonPanelPressCommand;
-import frc.robot.commands.autonomous.WaitForDelay;
-import frc.robot.commands.autonomous.WaitForTrue;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -22,8 +19,6 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.generated.TunerConstants;
@@ -121,7 +116,7 @@ public class Robot extends TimedRobot {
     // We'll count the reef faces from 1 to 6
     s_Swerve.resetPose(new Pose2d());
 
-    String msg = SmartDashboard.getString("DB/String 0", "center");
+    String msg = SmartDashboard.getString("DB/String 0", "");
     if (msg.equalsIgnoreCase("center")) {
       AutonomousPrograms.auto_Center(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
     }
@@ -131,8 +126,16 @@ public class Robot extends TimedRobot {
     else if (msg.equalsIgnoreCase("left")) {
       AutonomousPrograms.auto_Left(s_Swerve, s_Elevator, bp_Operator, s_EndEffector);
     }
+    else if (msg.equalsIgnoreCase("test1")) {
+      System.out.print("test1");
+      AutonomousPrograms.auto_Test1(s_Swerve, s_Elevator).schedule();
+    }
+    else if (msg.equalsIgnoreCase("test2")) {
+      System.out.print("test2");
+      AutonomousPrograms.auto_Test2(s_Swerve, s_Elevator).schedule();
+    }
     else {
-    AutonomousPrograms.auto_Line(s_Swerve, s_Elevator).schedule();
+      AutonomousPrograms.auto_Line(s_Swerve, s_Elevator).schedule();
     }
     // REEF FACE 1
     // new SequentialCommandGroup(
@@ -170,7 +173,7 @@ public class Robot extends TimedRobot {
 		// ).schedule();
     //new Orangelight(s_Swerve).schedule();
     
-    LimelightHelpers.setPipelineIndex(Config.kLimelight, 0);
+    // LimelightHelpers.setPipelineIndex(Config.kLimelight, 0);
   }
 
   @Override

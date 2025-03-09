@@ -19,12 +19,14 @@ public class DriveToPoseCommand extends Command {
         // Can be used from any starting position
         Origin(0, 0, 0),
         Pullout(0.5, 0, 0),
+        PulloutTest(2,0, 0),
+        PulloutTurnTest(0, 0, 90),
 
         // CENTER ONLY
         Reef10ACoral(2.875, 0, 0), 
         Reef10ABackup(2, 0, 0),
-        Reef10AlgaeBackup(2, -0.5, 0),
-        Reef10Algae(3.9, -0.5, 0, 0.35),
+        Reef10AlgaeBackup(2, -0.4, 0),
+        Reef10Algae(3.9, -0.4, 0, 0.35),
         FaceProcessor(2.85, 6.3, 90),
         FleeFromProcessor(5.0, 6.0, 90),
         
@@ -135,11 +137,25 @@ public class DriveToPoseCommand extends Command {
         }
 
         double elevatorSpeedReduction = (s_Elevator.getEncoderValue()/Level.Coral4.value)*0.35; // From 0 to 1 (0% to 100%), how much do we reduce swerve speed?
-        s_Swerve.setControl(drive_field.
-            withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
-            .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
-            .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
-        );
+        
+        if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+            s_Swerve.setControl(drive_field.
+                withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
+                .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
+                .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
+            );
+        } else {
+            s_Swerve.setControl(drive_field.
+                withVelocityX(d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
+                .withVelocityY(d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
+                .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
+            );
+        }
+
+        System.out.println("Can Coder: " + s_Swerve.getModule(0).getEncoder().getPosition().getValueAsDouble());
+        System.out.println("X POS: " + s_Swerve.getState().Pose.getX());
+        System.out.println("Y POS: " + s_Swerve.getState().Pose.getY());
+        System.out.println("ROT: " + s_Swerve.getState().Pose.getRotation().getDegrees());
     }
 
     @Override
