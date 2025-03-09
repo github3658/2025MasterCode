@@ -30,7 +30,6 @@ public class SwerveDriveCommand extends Command {
 
     @Override
     public void initialize() {
-        // s_Swerve.resetPose(new Pose2d()); TODO: Remove later.
     }
 
     @Override

@@ -1,5 +1,6 @@
 package frc.robot.commands.autonomous;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.ButtonPanel;
@@ -13,6 +14,20 @@ import frc.robot.commands.ElevatorDefaultCommand;
 import frc.robot.commands.EndoFactorDefaultCommand;
 
 public class AutonomousPrograms {
+    public static SequentialCommandGroup auto_Test1(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {
+      return new SequentialCommandGroup(
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTest)
+        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurn)
+      );
+    }
+
+    public static SequentialCommandGroup auto_Test2(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {
+      return new SequentialCommandGroup(
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurnTest)
+        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurn)
+      );
+    }
+
     public static ParallelCommandGroup auto_Right(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator, ButtonPanel bp_Operator, EndoFactorSubsystem s_EndEffector) {
       return new ParallelCommandGroup(
         new ParallelCommandGroup(
@@ -68,6 +83,48 @@ public class AutonomousPrograms {
             //   )
             )
         );
+    }
+
+    public static ParallelCommandGroup auto_Left(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator, ButtonPanel bp_Operator, EndoFactorSubsystem s_EndEffector) {
+      return new ParallelCommandGroup(
+        new ParallelCommandGroup(
+          new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true).withDeadline(null),
+          new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator).ignoringDisable(true)
+        ),
+
+        new SequentialCommandGroup (
+          new ParallelCommandGroup(
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef11ACoral), 
+            new ButtonPanelPressCommand(Button.ElevatorPosition4, true)
+          ), 
+          new WaitForTrue(() -> s_Elevator.isFinished()),
+          new WaitForTrue(() -> s_EndEffector.isFinished()), 
+          new LogLocationCommand(s_Swerve, "DROP OFF CORAL 1"),
+          new ButtonPanelPressCommand(Button.CoralOut, true),
+          new WaitForDelay(0.1),
+          new ParallelCommandGroup(
+            new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.invCoralStationBackup)
+          ),
+          new ParallelCommandGroup(
+            new ButtonPanelPressCommand(Button.CoralIn, true).repeatedly().until(() -> s_EndEffector.hasCoral()),
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.invCoralStation)
+          ),
+          new LogLocationCommand(s_Swerve, "INTAKE CORAL"),
+          new ParallelCommandGroup(
+            new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.ElevatorPosition4, true)),
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef12ACoral)
+          ),
+          new WaitForTrue(() -> s_Elevator.isFinished()),
+          new WaitForTrue(() -> s_EndEffector.isFinished()),
+          new ButtonPanelPressCommand(Button.CoralOut, true),
+          new WaitForDelay(0.1),
+          new ParallelCommandGroup(
+            new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef12ABackup)
+          )
+        )
+      );
     }
 
     public static SequentialCommandGroup auto_Line(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {

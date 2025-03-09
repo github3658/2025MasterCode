@@ -66,4 +66,16 @@ public class ButtonPanel {
     public void setIndicatorLight(Button button, boolean on) {
         button_panel.setOutput(button.indicator, on);
     }
+
+    public void AlgeaCancel() { // This command (should) cancel the algea button press at the end of autonomous in case that it is not cancelled during.
+        Button.AlgaeIn.pressed = false;
+        System.out.println("AlgeaCanceled");
+    }
+    
+    public void AutonCancel() { // This command (should) cancel all button presses at the end of autonomous in case they are not calcelled during autonomous.
+        for (Button panel : Button.values()) {
+            panel.pressed = false;
+        }
+        System.out.println("ButtonsCanceled");
+    }
 }
