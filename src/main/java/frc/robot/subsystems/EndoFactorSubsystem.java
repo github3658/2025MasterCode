@@ -186,6 +186,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
 
     //region Algae
     public void intakeAlgae() {
+        //TODO: Should this be changed to listen to the limit switch, hasAlgae.
         double speed = m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit ? 0 : -d_IntakeMotorSpeed;
         m_DeliveryMotor.set(speed);
     }
@@ -208,6 +209,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
     }
 
     public boolean hasAlgae() {
+        SmartDashboard.putBoolean("Algae Limit Switch", dio_LimitSwitch.get());
         return dio_LimitSwitch.get();
         // return (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit);
     }
