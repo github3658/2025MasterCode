@@ -10,12 +10,15 @@ import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
 
 public class EndoFactorSubsystem extends SubsystemBase {
+
+    private DigitalInput dio_LimitSwitch = new DigitalInput(Config.kAlgeaLimitSwitch);
     public EndoFactorSubsystem() {
         pt_PivotTarget = PivotTarget.CoralIntake;
         setMotorConfig();
@@ -183,6 +186,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
 
     //region Algae
     public void intakeAlgae() {
+        //TODO: Should this be changed to listen to the limit switch, hasAlgae.
         double speed = m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit ? 0 : -d_IntakeMotorSpeed;
         m_DeliveryMotor.set(speed);
     }
@@ -205,7 +209,9 @@ public class EndoFactorSubsystem extends SubsystemBase {
     }
 
     public boolean hasAlgae() {
-        return (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit);
+        SmartDashboard.putBoolean("Algae Limit Switch", dio_LimitSwitch.get());
+        return dio_LimitSwitch.get();
+        // return (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit);
     }
     //endregion
     //endregion
