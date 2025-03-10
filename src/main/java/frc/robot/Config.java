@@ -24,7 +24,7 @@ public class Config {
     //region Elevator
     public static final int kLeftElevatorMotor = 41;
     public static final int kRightElevatorMotor = 42;
-    public static final int kLimitSwitch = 0;
+    public static final int kElevatorLimitSwitch = 0;
     //endregion
 
     //region Climb
@@ -36,5 +36,6 @@ public class Config {
     public static final int kDeliveryMotorId = 32;
     public static final int kDeliveryRangeId = 61;
     public static final int kPivotEncoderId = 33; 
+    public static final int kAlgeaLimitSwitch = 1;
     //endregion
 }
