@@ -35,11 +35,11 @@ public class Robot extends TimedRobot {
   // This is a custom class I made that lets you check for input using a Button enum.
   private ButtonPanel bp_Operator = new ButtonPanel(1);
 
+  private LEDSubsystem s_LED = new LEDSubsystem();
   private SwerveDrivetrainSubsystem s_Swerve = TunerConstants.createDrivetrain();
   private ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
   private EndoFactorSubsystem s_EndEffector = new EndoFactorSubsystem();
   private ClimbSubsystem s_ClimbSubsystem = new ClimbSubsystem();
-  private LEDSubsystem s_LED = new LEDSubsystem();
 
   @Override
   public void robotInit() {

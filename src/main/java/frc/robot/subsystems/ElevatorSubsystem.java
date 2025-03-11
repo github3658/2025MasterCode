@@ -95,24 +95,24 @@ public class ElevatorSubsystem extends SubsystemBase {
             leftSupply = l;
             SmartDashboard.putNumber("Elevator - Left Supply", leftSupply);
             System.out.println("left "+leftSupply);
-            // if (leftSupply > 40 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
-            //     m_LeftElevatorMotor.setPosition(0, 0);
-            //     m_RightElevatorMotor.setPosition(0, 0);
-            //     leftSupply = 0;
-            // }
-            currentLimitSafety();
+            if (leftSupply > 40 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
+                m_LeftElevatorMotor.setPosition(0, 0);
+                m_RightElevatorMotor.setPosition(0, 0);
+                leftSupply = 0;
+            }
+            // currentLimitSafety();
         }   
         double r = m_RightElevatorMotor.getSupplyCurrent().getValueAsDouble();
         if (Math.abs(r) > Math.abs(rightSupply)) {
             SmartDashboard.putNumber("Elevator - Right Supply", rightSupply);
             rightSupply = r;
             System.out.println("right "+rightSupply);
-            // if (rightSupply > 40 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
-                // m_LeftElevatorMotor.setPosition(0, 0);
-                // m_RightElevatorMotor.setPosition(0, 0);
-                // rightSupply = 0;
-            // }
-            currentLimitSafety();
+            if (rightSupply > 40 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
+                m_LeftElevatorMotor.setPosition(0, 0);
+                m_RightElevatorMotor.setPosition(0, 0);
+                rightSupply = 0;
+            }
+            // currentLimitSafety();
         }
     }
 
