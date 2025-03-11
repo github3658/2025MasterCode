@@ -1,16 +1,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
-<<<<<<< HEAD
-
-public class ButtonPanel {
-    public enum Buttons {
-=======
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class ButtonPanel {
     public enum Button {
->>>>>>> 62222d0556ecedbd1767bb71223c3f36f4a12498
         Stow(1, 1),
         ElevatorPosition2(2, 2),
         ElevatorPosition3(3, 3),
@@ -18,26 +12,6 @@ public class ButtonPanel {
         ElevatorPositionBarge(5, 5),
         ManualClaw1(6),
         ManualClaw2(7),
-<<<<<<< HEAD
-        ClawPositionCoral(8, 6),
-        ClawPositionAlgae(9, 7),
-        CoralIn(10, 8),
-        CoralOut(11, 9),
-        AlgaeIn(12, 10),
-        AlgaeOut(13, 11),
-        ShallowClimb(14),
-        DeepClimbGrab(15),
-        DeepClimbClimb(16);
-        public final int value;
-        public final int indicator;
-        Buttons(int value) {
-            this.value = value;
-            this.indicator = 0;
-        }
-        Buttons(int value, int indicator) {
-            this.value = value;
-            this.indicator = indicator;
-=======
         ClawPositionCoral(12, 12),
         ClawPositionAlgae(13, 13),
         CoralIn(8, 8),
@@ -59,7 +33,6 @@ public class ButtonPanel {
             this.value = value;
             this.indicator = indicator;
             this.pressed = false;
->>>>>>> 62222d0556ecedbd1767bb71223c3f36f4a12498
         }
     }
 
@@ -69,14 +42,6 @@ public class ButtonPanel {
         button_panel = new GenericHID(port);
     }
 
-<<<<<<< HEAD
-    public boolean GetButton(Buttons button) {
-        return button_panel.getRawButton(button.value);
-    }
-
-    public boolean GetButtonPressed(Buttons button) {
-        return button_panel.getRawButtonPressed(button.value);
-=======
     /**
      * Returns whether a button is held or not.
      * @param button The button to check
@@ -112,6 +77,5 @@ public class ButtonPanel {
             panel.pressed = false;
         }
         System.out.println("ButtonsCanceled");
->>>>>>> 62222d0556ecedbd1767bb71223c3f36f4a12498
     }
 }

@@ -16,6 +16,7 @@ import frc.robot.ButtonPanel.Button;
 import frc.robot.commands.*; // This imports all of our commands.
 import frc.robot.commands.DriveToPoseCommand.Position;
 import frc.robot.commands.autonomous.AutonomousPrograms;
+import frc.robot.commands.autonomous.ButtonPanelPressCommand;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -23,6 +24,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.generated.TunerConstants;
@@ -37,11 +39,11 @@ public class Robot extends TimedRobot {
   // This is a custom class I made that lets you check for input using a Button enum.
   private ButtonPanel bp_Operator = new ButtonPanel(1);
 
+  private LEDSubsystem s_LED = new LEDSubsystem();
   private SwerveDrivetrainSubsystem s_Swerve = TunerConstants.createDrivetrain();
   private ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
   private EndoFactorSubsystem s_EndEffector = new EndoFactorSubsystem();
   private ClimbSubsystem s_ClimbSubsystem = new ClimbSubsystem();
-  private LEDSubsystem s_LED = new LEDSubsystem();
 
   @Override
   public void robotInit() {
@@ -242,20 +244,30 @@ double counter = 0.0;
 
   @Override
   public void testInit() {
-    CommandScheduler.getInstance().cancelAll();
-    s_Swerve.InitializeHonk();
+    // CommandScheduler.getInstance().cancelAll();
+    // s_Swerve.InitializeHonk();
+    new SequentialCommandGroup(
+    new ButtonPanelPressCommand(Button.ClawPositionAlgae, true),
+    new ButtonPanelPressCommand(Button.AlgaeOut, true)
+    );
   }
 
   @Override
   public void testPeriodic() {
-    if (bp_Operator.getButton(Button.HONK)) {
-      s_Swerve.Honk(true);
-    }
-    else {
-      s_Swerve.Honk(false);
-    }
+    // if (bp_Operator.getButton(Button.HONK)) {
+    //   s_Swerve.Honk(true);
+    // }
+    // else {
+    //   s_Swerve.Honk(false);
+    // }
   }
 
   @Override
-  public void testExit() {}
+  public void testExit() {
+    bp_Operator.AlgeaCancel();
+
+  }
+
+  @Override
+  public void simulationPeriodic() {}
 }

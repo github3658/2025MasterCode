@@ -10,12 +10,16 @@ import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
+import frc.robot.subsystems.LEDSubsystem.Color;
 
 public class EndoFactorSubsystem extends SubsystemBase {
+
+    private DigitalInput dio_LimitSwitch = new DigitalInput(Config.kAlgeaLimitSwitch);
     public EndoFactorSubsystem() {
         pt_PivotTarget = PivotTarget.CoralIntake;
         setMotorConfig();
@@ -48,8 +52,8 @@ public class EndoFactorSubsystem extends SubsystemBase {
         }
     }
     private EjectSpeed es_EjectSpeed = EjectSpeed.Level1;
-    private final double d_PivotMotorSpeed = 0.1;
-    private final double c_PivotSupplyCurrentLimit = 2.5;
+    private final double d_PivotMotorSpeed = 0.145;
+    private final double c_PivotSupplyCurrentLimit = 3;
     private boolean b_hasCoral;
     
     private void setMotorConfig() {
@@ -183,7 +187,9 @@ public class EndoFactorSubsystem extends SubsystemBase {
 
     //region Algae
     public void intakeAlgae() {
+        //TODO: Should this be changed to listen to the limit switch, hasAlgae.
         double speed = m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit ? 0 : -d_IntakeMotorSpeed;
+        
         m_DeliveryMotor.set(speed);
     }
 
@@ -205,7 +211,9 @@ public class EndoFactorSubsystem extends SubsystemBase {
     }
 
     public boolean hasAlgae() {
-        return (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit);
+        SmartDashboard.putBoolean("Algae Limit Switch", dio_LimitSwitch.get());
+        return dio_LimitSwitch.get();
+        // return (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit);
     }
     //endregion
     //endregion
@@ -235,12 +243,16 @@ public class EndoFactorSubsystem extends SubsystemBase {
     private PivotTarget pt_PivotTarget;
     //endregion
 
+    private double _maxCurrent = 0;
     //region Methods
 public void runPivotToPose(PivotTarget target) {
     double d_CurrentPose = getPivotPosition();
     double c_Current = m_PivotMotor.getSupplyCurrent().getValueAsDouble();
     double speed = c_Current > c_PivotSupplyCurrentLimit ? 0 : Math.min(Math.max((target.value - d_CurrentPose) * 35, -1), 1);
-
+    
+if (c_Current > _maxCurrent) _maxCurrent = c_Current;
+    SmartDashboard.putNumber("Algae Current", _maxCurrent);
+    SmartDashboard.putNumber("Algae Speed", speed* d_PivotMotorSpeed);
     m_PivotMotor.set(speed * d_PivotMotorSpeed);
 }
 

@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -19,7 +18,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private TalonFX m_LeftElevatorMotor = new TalonFX(Config.kLeftElevatorMotor, Config.kCanbus);
     private TalonFX m_RightElevatorMotor = new TalonFX(Config.kRightElevatorMotor, Config.kCanbus);
-    private DigitalInput dio_LimitSwitch = new DigitalInput(Config.kLimitSwitch);
+    private DigitalInput dio_LimitSwitch = new DigitalInput(Config.kElevatorLimitSwitch);
 
 
     public enum Level {
@@ -101,6 +100,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 m_RightElevatorMotor.setPosition(0, 0);
                 leftSupply = 0;
             }
+            // currentLimitSafety();
         }   
         double r = m_RightElevatorMotor.getSupplyCurrent().getValueAsDouble();
         if (Math.abs(r) > Math.abs(rightSupply)) {
@@ -112,6 +112,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 m_RightElevatorMotor.setPosition(0, 0);
                 rightSupply = 0;
             }
+            // currentLimitSafety();
         }
     }
 
@@ -187,5 +188,70 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public boolean getLocked() {
         return b_locked;
+    }
+
+    public boolean isMovingUp() {
+        if (l_TargetLevel.value > getEncoderValue()) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public void currentLimitSafety() {
+        boolean isMovingUp = isMovingUp();
+        if (isMovingUp) {
+            switch(getElevatorLevel()) {
+                case Stow : 
+                    l_TargetLevel = Level.Stow;
+                    break;
+                case Coral1: 
+                    l_TargetLevel = Level.Stow;
+                    break;
+                case Coral2:
+                    l_TargetLevel = Level.Coral1;
+                    break;
+                case Coral3:
+                case Algea1:
+                    l_TargetLevel = Level.Coral2;
+                    break;
+                case Coral4: 
+                case Algea2:
+                    l_TargetLevel = Level.Coral3;
+                    break;
+                case LevelBarge:
+                    l_TargetLevel = Level.Coral4;
+                    break;
+            }
+        }
+        
+        else {
+            switch(getElevatorLevel()) {
+                case Stow : 
+                    m_LeftElevatorMotor.setPosition(0, 0);
+                    m_RightElevatorMotor.setPosition(0, 0);
+                    rightSupply = 0;
+                    leftSupply = 0;
+                    break;
+                case Coral1: 
+                    l_TargetLevel = Level.Coral2;
+                    break;
+                case Coral2:
+                    l_TargetLevel = Level.Coral3;
+                    break;
+                case Coral3:
+                case Algea1:
+                    l_TargetLevel = Level.Coral4;
+                    break;
+                case Coral4: 
+                case Algea2:
+                    l_TargetLevel = Level.LevelBarge;
+                    break;
+                case LevelBarge:
+                    l_TargetLevel = Level.LevelBarge;
+                    break;
+            }
+        }
     }
 }
