@@ -36,7 +36,7 @@ public class AutonomousPrograms {
 
         new SequentialCommandGroup (
           new ParallelCommandGroup(
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef9ACoral), 
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef9ACoral).withTimeout(5.0), 
             new ButtonPanelPressCommand(Button.ElevatorPosition4, true)
           ), 
           new WaitForTrue(() -> s_Elevator.isFinished()),
@@ -46,16 +46,16 @@ public class AutonomousPrograms {
           new WaitForDelay(0.1),
           new ParallelCommandGroup(
             new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStationBackup)
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStationBackup).withTimeout(5.0)
           ),
           new ParallelCommandGroup(
             new ButtonPanelPressCommand(Button.CoralIn, true).repeatedly().until(() -> s_EndEffector.hasCoral()),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStation)
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStation).withTimeout(5.0)
           ),
           new LogLocationCommand(s_Swerve, "INTAKE CORAL"),
           new ParallelCommandGroup(
             new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.ElevatorPosition4, true)),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ACoral)
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ACoral).withTimeout(5.0)
           ),
           new WaitForTrue(() -> s_Elevator.isFinished()),
           new WaitForTrue(() -> s_EndEffector.isFinished()),
@@ -63,7 +63,7 @@ public class AutonomousPrograms {
           new WaitForDelay(0.1),
           new ParallelCommandGroup(
             new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackup)
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackup).withTimeout(5.0)
           )
           // new ParallelCommandGroup(
           //   new SequentialCommandGroup(
@@ -158,7 +158,7 @@ public class AutonomousPrograms {
               new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef10AlgaeBackup),
               // Intake algae
               new ButtonPanelPressCommand(Button.AlgaeIn, true),
-              new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef10Algae).until(() -> s_EndEffector.hasAlgae()),
+              new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef10Algae).until(() -> s_EndEffector.hasAlgaeLimitSwitch()),
               new LogLocationCommand(s_Swerve, "GOT ALGAE"),
               // Go to processor
               new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin),

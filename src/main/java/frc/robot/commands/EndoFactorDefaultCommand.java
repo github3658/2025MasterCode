@@ -35,7 +35,7 @@ public class EndoFactorDefaultCommand extends Command {
     @Override
     public void execute() {
         //TODO: Remove after testing
-        s_EndEffector.hasAlgae();
+        s_EndEffector.hasAlgaeLimitSwitch();
         // Depending on elevator position, set the coral eject position.
         pt_IdealTarget = PivotTarget.CoralIntake;
         pt_AlgaeTarget = PivotTarget.AlgaeIntake;
@@ -125,7 +125,7 @@ public class EndoFactorDefaultCommand extends Command {
             }
         }
 
-        if (bp_Operator.getButton(Button.AlgaeOut) == false && bp_Operator.getButton(Button.AlgaeIn) == false && (s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntake) || s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntakeStow))) {
+        if (bp_Operator.getButton(Button.AlgaeOut) == false && bp_Operator.getButton(Button.AlgaeIn) == false && !s_EndEffector.isAlgaePulseRunning() && (s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntake) || s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntakeStow))) {
             s_EndEffector.stopAlgaeDelivery();
         }
 

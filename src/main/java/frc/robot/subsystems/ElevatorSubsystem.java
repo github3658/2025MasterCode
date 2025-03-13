@@ -63,6 +63,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     double leftSupply;
     double rightSupply;
+    double d_ElevatorCurrentLimit = 36.0;
+    double d_ElevatorSpeedRamp = 0.0;
     @Override
     public void periodic() {
         if (!b_locked) {
@@ -70,7 +72,10 @@ public class ElevatorSubsystem extends SubsystemBase {
             if (getTargetLevel().value < getEncoderValue()) {
                 speed = (getTargetLevel().value - getEncoderValue()) * 0.05;
             }
-            speed = Math.min(Math.max(speed, -0.75), 0.75); // Clamp speed
+            if (Math.abs(getTargetLevel().value - getEncoderValue()) > 1) {
+                d_ElevatorSpeedRamp = Math.min(d_ElevatorSpeedRamp + 0.1, 1.0);
+            }
+            speed = Math.min(Math.max(speed, -0.75 * d_ElevatorSpeedRamp), 0.75 * d_ElevatorSpeedRamp); // Clamp speed
             if (!dio_LimitSwitch.get()) {
                 m_LeftElevatorMotor.set(0);
                 m_RightElevatorMotor.set(0);
@@ -95,24 +100,25 @@ public class ElevatorSubsystem extends SubsystemBase {
             leftSupply = l;
             SmartDashboard.putNumber("Elevator - Left Supply", leftSupply);
             System.out.println("left "+leftSupply);
-            if (leftSupply > 40 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
-                m_LeftElevatorMotor.setPosition(0, 0);
-                m_RightElevatorMotor.setPosition(0, 0);
-                leftSupply = 0;
+            if (leftSupply > d_ElevatorCurrentLimit) { // && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
+                // m_LeftElevatorMotor.setPosition(0, 0);
+                // m_RightElevatorMotor.setPosition(0, 0);
+                // leftSupply = 0;
+                currentLimitSafety();
+
             }
-            // currentLimitSafety();
         }   
         double r = m_RightElevatorMotor.getSupplyCurrent().getValueAsDouble();
         if (Math.abs(r) > Math.abs(rightSupply)) {
             SmartDashboard.putNumber("Elevator - Right Supply", rightSupply);
             rightSupply = r;
             System.out.println("right "+rightSupply);
-            if (rightSupply > 40 && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
-                m_LeftElevatorMotor.setPosition(0, 0);
-                m_RightElevatorMotor.setPosition(0, 0);
-                rightSupply = 0;
+            if (rightSupply > d_ElevatorCurrentLimit) { // && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
+                // m_LeftElevatorMotor.setPosition(0, 0);
+                // m_RightElevatorMotor.setPosition(0, 0);
+                // rightSupply = 0;
+                currentLimitSafety();
             }
-            // currentLimitSafety();
         }
     }
 
@@ -121,6 +127,7 @@ public class ElevatorSubsystem extends SubsystemBase {
      * @param level The level to set.
      */
     public void setLevel(Level level) {
+        d_ElevatorSpeedRamp = 0;
         l_TargetLevel = level;
     }
 
@@ -200,8 +207,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public void currentLimitSafety() {
-        boolean isMovingUp = isMovingUp();
-        if (isMovingUp) {
+        boolean b_GoingUp = isMovingUp();
+        leftSupply = 0;
+        rightSupply = 0;
+        if (b_GoingUp) {
+            System.out.println("Going UP");
             switch(getElevatorLevel()) {
                 case Stow : 
                     l_TargetLevel = Level.Stow;
@@ -227,6 +237,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
         
         else {
+            System.out.println("Going DOWN");
             switch(getElevatorLevel()) {
                 case Stow : 
                     m_LeftElevatorMotor.setPosition(0, 0);
@@ -253,5 +264,6 @@ public class ElevatorSubsystem extends SubsystemBase {
                     break;
             }
         }
+        System.out.println("Retreat to "+l_TargetLevel.name());
     }
 }
