@@ -83,7 +83,10 @@ public class EndoFactorSubsystem extends SubsystemBase {
     /** The number of encoder ticks required to eject the coral from when the play presses the button. */
     private final double d_CoralOutTravel = 7.5;
 
+    private final double d_MaxAlgaePulseTime = 1.0;
+
     private final Timer t_CoralIntakeTimer = new Timer();
+    private final Timer t_AlgaePulseTimer = new Timer();
     /** If true this prevents the player from ejecting the coral */
     private boolean b_IsCoralOutputDisabled; 
     /** If true this prevents the player from intaking the coral */
@@ -92,6 +95,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
     private boolean b_IsCoralRunningIntakeToPose;
     private boolean b_IsCoralEjecting;
     private double d_TargetCoralPosition;
+    private boolean b_HoldingAlgae;
 
     //endregion
 
@@ -194,6 +198,9 @@ public class EndoFactorSubsystem extends SubsystemBase {
     }
 
     public void ejectAlgae() {
+        b_HoldingAlgae = false;
+        t_AlgaePulseTimer.stop();
+        t_AlgaePulseTimer.reset();
         m_DeliveryMotor.set(0.50);
     }
 
@@ -210,11 +217,15 @@ public class EndoFactorSubsystem extends SubsystemBase {
         b_canGoToCoralPos = allowed;
     }
 
-    public boolean hasAlgae() {
+    public boolean hasAlgaeLimitSwitch() {
         SmartDashboard.putBoolean("Algae Limit Switch", dio_LimitSwitch.get());
         return dio_LimitSwitch.get();
-        // return (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit);
     }
+
+    public boolean isAlgaePulseRunning() {
+        return t_AlgaePulseTimer.isRunning();
+    }
+
     //endregion
     //endregion
     //endregion
@@ -265,7 +276,7 @@ if (c_Current > _maxCurrent) _maxCurrent = c_Current;
     }
 
     public void setPivot(PivotTarget target) {
-        System.out.println("Set pivot!");
+        //System.out.println("Set pivot!");
         pt_PivotTarget = target;
     }
 
@@ -319,6 +330,23 @@ if (c_Current > _maxCurrent) _maxCurrent = c_Current;
 
         SmartDashboard.putNumber("MaxDeliveryCurrent", maxDeliveyCurrent);
         SmartDashboard.putNumber("MaxPivotCurrent", maxPivotCurrent);
+
+        if (hasAlgaeLimitSwitch()) {
+            b_HoldingAlgae = true;
+        }
+
+        if (!hasAlgaeLimitSwitch() && b_HoldingAlgae && !t_AlgaePulseTimer.isRunning()) {
+            t_AlgaePulseTimer.start();
+        }
+
+        if (b_HoldingAlgae && t_AlgaePulseTimer.isRunning() && t_AlgaePulseTimer.get() < d_MaxAlgaePulseTime) {
+            intakeAlgae();
+        }
+        else if (hasAlgaeLimitSwitch() || t_AlgaePulseTimer.get() >= d_MaxAlgaePulseTime) {
+            b_HoldingAlgae = false;
+            t_AlgaePulseTimer.stop();
+            t_AlgaePulseTimer.reset();
+        }
         
         //System.out.println("PivotSupply"+m_PivotMotor.getSupplyCurrent().getValueAsDouble());
         //System.out.println("DeliverySupply"+m_DeliveryMotor.getSupplyCurrent().getValueAsDouble());
