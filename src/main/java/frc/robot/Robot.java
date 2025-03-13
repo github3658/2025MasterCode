@@ -20,6 +20,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -221,13 +222,12 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void autonomousExit() {
-      bp_Operator.AlgeaCancel();
-      bp_Operator.AutonCancel();
-  }
+  public void autonomousExit() {}
 
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    bp_Operator.AutonCancel();
+  }
 double counter = 0.0;
   @Override
   public void teleopPeriodic() {
@@ -242,10 +242,16 @@ double counter = 0.0;
   public void testInit() {
     // CommandScheduler.getInstance().cancelAll();
     // s_Swerve.InitializeHonk();
-    new SequentialCommandGroup(
-    new ButtonPanelPressCommand(Button.ClawPositionAlgae, true),
-    new ButtonPanelPressCommand(Button.AlgaeOut, true)
-    );
+
+    new ParallelCommandGroup(
+      new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true),
+      new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator).ignoringDisable(true),
+      new SequentialCommandGroup(
+        new ButtonPanelPressCommand(Button.ElevatorPosition2, true),
+        new ButtonPanelPressCommand(Button.ClawPositionAlgae, true),
+        new ButtonPanelPressCommand(Button.AlgaeOut, true)
+      )
+    ).schedule();
   }
 
   @Override
@@ -259,10 +265,7 @@ double counter = 0.0;
   }
 
   @Override
-  public void testExit() {
-    bp_Operator.AlgeaCancel();
-
-  }
+  public void testExit() {}
 
   @Override
   public void simulationPeriodic() {}
