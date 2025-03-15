@@ -8,9 +8,11 @@ import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.FovParamsConfigs;
 import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MusicTone;
 import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -38,6 +40,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
                         .withFOVRangeY(6.75)
                 )
         );
+        PivotTarget.CoralIntake.value = s_PivotEncoder.getAbsolutePosition(true).getValueAsDouble();
     }
 
     private final double d_IntakeMotorSpeed = 0.125;
@@ -52,7 +55,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
         }
     }
     private EjectSpeed es_EjectSpeed = EjectSpeed.Level1;
-    private final double d_PivotMotorSpeed = 0.145;
+    private final double d_PivotMotorSpeed = 0.135;
     private final double c_PivotSupplyCurrentLimit = 3;
     private boolean b_hasCoral;
     
@@ -191,8 +194,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
 
     //region Algae
     public void intakeAlgae() {
-        //TODO: Should this be changed to listen to the limit switch, hasAlgae.
-        double speed = m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit ? 0 : -d_IntakeMotorSpeed;
+        double speed = (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit) ? 0 : -d_IntakeMotorSpeed;
         
         m_DeliveryMotor.set(speed);
     }
@@ -222,8 +224,25 @@ public class EndoFactorSubsystem extends SubsystemBase {
         return dio_LimitSwitch.get();
     }
 
+    public boolean hasAlgaeCurrentLimit() {
+        return m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit;
+    }
+
+    public boolean likelyHasAlgae() {
+        return b_HoldingAlgae;
+    }
+
     public boolean isAlgaePulseRunning() {
         return t_AlgaePulseTimer.isRunning();
+    }
+
+    public void beep(boolean beeping) {
+        if (DriverStation.isTestEnabled() && beeping) {
+            m_DeliveryMotor.setControl(new MusicTone(440));
+        }
+        else {
+            m_DeliveryMotor.setControl(new MusicTone(0));
+        }
     }
 
     //endregion
@@ -238,9 +257,9 @@ public class EndoFactorSubsystem extends SubsystemBase {
     // TODO: Change to reflect the values of the CANcoder at these positions in the end.
     public enum PivotTarget {
         CoralIntake(-0.415),
-        SafetyTarget(-0.366),
+        SafetyTarget(-0.36),
         Level1(-0.415),
-        Level2AndLevel3(-0.366),
+        Level2AndLevel3(-0.36),
         Level4(-0.243),
         AlgaeIntake(0.128),
         AlgaeIntakeStow(0.050),
@@ -261,14 +280,27 @@ public void runPivotToPose(PivotTarget target) {
     double c_Current = m_PivotMotor.getSupplyCurrent().getValueAsDouble();
     double speed = c_Current > c_PivotSupplyCurrentLimit ? 0 : Math.min(Math.max((target.value - d_CurrentPose) * 35, -1), 1);
     
-if (c_Current > _maxCurrent) _maxCurrent = c_Current;
-    SmartDashboard.putNumber("Algae Current", _maxCurrent);
-    SmartDashboard.putNumber("Algae Speed", speed* d_PivotMotorSpeed);
     m_PivotMotor.set(speed * d_PivotMotorSpeed);
 }
 
+    private boolean b_IsSafe;
+    private int i_SafeSamples;
+    private final int c_MaxSafeSamples = 15;
+    public boolean isSafeSample() {
+        return(getPivotPosition() >= PivotTarget.SafetyTarget.value - 0.01);
+    }
+
     public boolean isSafe() {
-        return(getPivotPosition() >= PivotTarget.SafetyTarget.value - 0.004);
+        if (isSafeSample() != b_IsSafe) {
+            i_SafeSamples ++;
+            if (i_SafeSamples >= c_MaxSafeSamples) {
+                b_IsSafe = isSafeSample();
+            }
+        }
+        else {
+            i_SafeSamples = 0;
+        }
+        return b_IsSafe;
     }
 
     public boolean isFinished() {
@@ -331,19 +363,21 @@ if (c_Current > _maxCurrent) _maxCurrent = c_Current;
         SmartDashboard.putNumber("MaxDeliveryCurrent", maxDeliveyCurrent);
         SmartDashboard.putNumber("MaxPivotCurrent", maxPivotCurrent);
 
-        if (hasAlgaeLimitSwitch()) {
+        if (getPivotTarget() == PivotTarget.AlgaeIntake && (hasAlgaeLimitSwitch() || hasAlgaeCurrentLimit())) { // When we first obtain algae, set this boolean to true.
             b_HoldingAlgae = true;
         }
 
-        if (!hasAlgaeLimitSwitch() && b_HoldingAlgae && !t_AlgaePulseTimer.isRunning()) {
+        if (!(hasAlgaeLimitSwitch() || hasAlgaeCurrentLimit()) && b_HoldingAlgae && !t_AlgaePulseTimer.isRunning()) { // If the limit switch is unset, and we should be holding algae, start the pulse timer
             t_AlgaePulseTimer.start();
         }
 
-        if (b_HoldingAlgae && t_AlgaePulseTimer.isRunning() && t_AlgaePulseTimer.get() < d_MaxAlgaePulseTime) {
+        if (b_HoldingAlgae && t_AlgaePulseTimer.isRunning() && t_AlgaePulseTimer.get() < d_MaxAlgaePulseTime) { // Run the intake while the timer is less than the max
             intakeAlgae();
         }
-        else if (hasAlgaeLimitSwitch() || t_AlgaePulseTimer.get() >= d_MaxAlgaePulseTime) {
-            b_HoldingAlgae = false;
+        else if ((hasAlgaeLimitSwitch() || hasAlgaeCurrentLimit()) || t_AlgaePulseTimer.get() >= d_MaxAlgaePulseTime || getPivotTarget() != PivotTarget.AlgaeIntake) { // Cancel the intake if we get the algae again or time runs out.
+            if (t_AlgaePulseTimer.get() >= d_MaxAlgaePulseTime || getPivotTarget() != PivotTarget.AlgaeIntake) {
+                b_HoldingAlgae = false;
+            }
             t_AlgaePulseTimer.stop();
             t_AlgaePulseTimer.reset();
         }

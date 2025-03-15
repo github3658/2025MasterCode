@@ -13,11 +13,15 @@ import frc.robot.commands.*; // This imports all of our commands.
 import frc.robot.commands.DriveToPoseCommand.Position;
 import frc.robot.commands.autonomous.AutonomousPrograms;
 import frc.robot.commands.autonomous.ButtonPanelPressCommand;
+
+import com.ctre.phoenix6.controls.MusicTone;
+
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -84,7 +88,10 @@ public class Robot extends TimedRobot {
     }
 
     // LED Controls
-    if (!s_Elevator.isFinished() || !s_EndEffector.isFinished()) {
+    if (!DriverStation.isDSAttached()) {
+      s_LED.setColor(Color.Magenta);
+    }
+    else if (!s_Elevator.isFinished() || !s_EndEffector.isFinished()) {
       s_LED.setColor(Color.Yellow);
     }
     else if (s_EndEffector.hasCoral()) {
@@ -95,13 +102,13 @@ public class Robot extends TimedRobot {
     }
 
     // POSE TESTING //
-    if (xb_Driver.getYButtonPressed()) {
-      new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ACoral, 0.05).schedule();
-    }
+    // if (xb_Driver.getYButtonPressed()) {
+    //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ACoral, 0.05).schedule();
+    // }
 
-    if (xb_Driver.getBButtonPressed()) {
-      new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin, 0.05).schedule();
-    }
+    // if (xb_Driver.getBButtonPressed()) {
+    //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin, 0.05).schedule();
+    // }
     // // // // // //
   }
 
@@ -205,20 +212,20 @@ public class Robot extends TimedRobot {
   //     SmartDashboard.putString("AprilTag Status", "No target detected");
   // }
 
-    NetworkTable table = NetworkTableInstance.getDefault().getTable(Config.kLimelight);
-    NetworkTableEntry ty = table.getEntry("ty");
-    double targetOffsetAngle_Vertical = ty.getDouble(0.0);
-    double limelightMountAngleDegrees = 27.0;
-    double limelightLenseHeightInches = 8.5;
+    // NetworkTable table = NetworkTableInstance.getDefault().getTable(Config.kLimelight);
+    // NetworkTableEntry ty = table.getEntry("ty");
+    // double targetOffsetAngle_Vertical = ty.getDouble(0.0);
+    // double limelightMountAngleDegrees = 27.0;
+    // double limelightLenseHeightInches = 8.5;
 
-    double goalHeightInches = 50.125;
+    // double goalHeightInches = 50.125;
 
-    double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
-    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+    // double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+    // double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
-    double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLenseHeightInches) / Math.tan(angleToGoalRadians);
+    // double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLenseHeightInches) / Math.tan(angleToGoalRadians);
 
-    SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
+    // SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
   }
 
   @Override
@@ -240,28 +247,80 @@ double counter = 0.0;
 
   @Override
   public void testInit() {
-    // CommandScheduler.getInstance().cancelAll();
-    // s_Swerve.InitializeHonk();
+    s_Swerve.removeDefaultCommand();
+    s_Elevator.removeDefaultCommand();
+    s_EndEffector.removeDefaultCommand();
+    s_ClimbSubsystem.removeDefaultCommand();
+    for (Button button : Button.values()) {
+      bp_Operator.setIndicatorLight(button, false);
+    }
+    d_MoleRate = 0.01;
+    b_GameOver = false;
+    for (int i = 0; i < i_MolesUp.length; i++) {
+      i_MolesUp[i] = 0;
+    }
+    i_Score = 0;
+    i_GameOverTimer = 0;
 
-    new ParallelCommandGroup(
-      new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true),
-      new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator).ignoringDisable(true),
-      new SequentialCommandGroup(
-        new ButtonPanelPressCommand(Button.ElevatorPosition2, true),
-        new ButtonPanelPressCommand(Button.ClawPositionAlgae, true),
-        new ButtonPanelPressCommand(Button.AlgaeOut, true)
-      )
-    ).schedule();
+    // new ParallelCommandGroup(
+    //   new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true),
+    //   new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator).ignoringDisable(true),
+    //   new SequentialCommandGroup(
+    //     new ButtonPanelPressCommand(Button.ElevatorPosition2, true),
+    //     new ButtonPanelPressCommand(Button.ClawPositionAlgae, true),
+    //     new ButtonPanelPressCommand(Button.AlgaeOut, true)
+    //   )
+    // ).schedule();
   }
 
+  double d_MoleRate;
+  boolean b_GameOver;
+  int[] i_MolesUp = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int i_Score;
+  int i_GameOverTimer;
   @Override
   public void testPeriodic() {
-    // if (bp_Operator.getButton(Button.HONK)) {
-    //   s_Swerve.Honk(true);
-    // }
-    // else {
-    //   s_Swerve.Honk(false);
-    // }
+    if (Math.random() < d_MoleRate) {
+      int b = ((int) Math.floor(Math.random() * 13)) + 1;
+      i_MolesUp[b-1] = 1;
+    }
+
+    int i = 0;
+    s_EndEffector.beep(false);
+    for (Button button : Button.values()) {
+      if (b_GameOver) {
+        i_GameOverTimer ++;
+        bp_Operator.setIndicatorLight(button, (i_GameOverTimer % 10 < 5) && i_GameOverTimer < 60);
+        if (i_GameOverTimer == 60) {
+          System.out.println("GAME OVER!");
+          System.out.println("Your final score was "+i_Score+"!");
+        }
+        break;
+      }
+      
+      if (bp_Operator.getButtonPressed(button)) {
+        if (i_MolesUp[i] > 0) {
+          i_MolesUp[i] = 0;
+          i_Score ++;
+          s_EndEffector.beep(true);
+        }
+        else {
+          b_GameOver = true;
+        }
+      }
+      else {
+        if (i_MolesUp[i] > 0) {
+          i_MolesUp[i] ++;
+        }
+        if (i_MolesUp[i] > 100) {
+          b_GameOver = true;
+        }
+      }
+      bp_Operator.setIndicatorLight(button, (i_MolesUp[i] > 0 && i_MolesUp[i] < 50) || (i_MolesUp[i] % 10 < 5));
+      i++;
+    }
+    d_MoleRate *= 1.0001;
+    SmartDashboard.putNumber("Mole Rate", d_MoleRate);
   }
 
   @Override

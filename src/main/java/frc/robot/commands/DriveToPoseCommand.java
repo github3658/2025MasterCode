@@ -25,9 +25,9 @@ public class DriveToPoseCommand extends Command {
         // CENTER ONLY
         Reef10ACoral(2.875, 0, 0), 
         Reef10ABackup(2, 0, 0),
-        Reef10AlgaeBackup(2, -0.4, 0),
-        Reef10Algae(3.9, -0.4, 0, 0.35),
-        FaceProcessor(2.85, 6.3, 90),
+        Reef10AlgaeBackup(2, -0.65, 0),
+        Reef10Algae(3.2, -0.65, 0, 0.35),
+        FaceProcessor(2.65, 6.3, 90),
         FleeFromProcessor(5.0, 6.0, 90),
         
         // RIGHT ONLY
@@ -152,10 +152,10 @@ public class DriveToPoseCommand extends Command {
             );
         }
 
-        System.out.println("Can Coder: " + s_Swerve.getModule(0).getEncoder().getPosition().getValueAsDouble());
-        System.out.println("X POS: " + s_Swerve.getState().Pose.getX());
-        System.out.println("Y POS: " + s_Swerve.getState().Pose.getY());
-        System.out.println("ROT: " + s_Swerve.getState().Pose.getRotation().getDegrees());
+        // System.out.println("Can Coder: " + s_Swerve.getModule(0).getEncoder().getPosition().getValueAsDouble());
+        // System.out.println("X POS: " + s_Swerve.getState().Pose.getX());
+        // System.out.println("Y POS: " + s_Swerve.getState().Pose.getY());
+        // System.out.println("ROT: " + s_Swerve.getState().Pose.getRotation().getDegrees());
     }
 
     @Override

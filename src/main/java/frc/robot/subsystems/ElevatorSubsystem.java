@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -48,12 +49,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         m_LeftElevatorMotor.setPosition(0);
         m_RightElevatorMotor.setPosition(0);
         setElevatorConfig();
-        //m_RightElevatorMotor.setControl(new Follower(Config.kLeftElevatorMotor, true));
+        m_RightElevatorMotor.setControl(new Follower(Config.kLeftElevatorMotor, false));
     }
 
     private void setElevatorConfig() {
         TalonFXConfiguration cElevatorMotorConfig = new TalonFXConfiguration();
-        cElevatorMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        cElevatorMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         cElevatorMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
         m_LeftElevatorMotor.getConfigurator().apply(cElevatorMotorConfig);
@@ -63,7 +64,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     double leftSupply;
     double rightSupply;
-    double d_ElevatorCurrentLimit = 36.0;
+    double d_ElevatorCurrentLimit_down = 53.0;
+    double d_ElevatorCurrentLimit_up = 70.0;
     double d_ElevatorSpeedRamp = 0.0;
     @Override
     public void periodic() {
@@ -72,17 +74,15 @@ public class ElevatorSubsystem extends SubsystemBase {
             if (getTargetLevel().value < getEncoderValue()) {
                 speed = (getTargetLevel().value - getEncoderValue()) * 0.05;
             }
-            if (Math.abs(getTargetLevel().value - getEncoderValue()) > 1) {
-                d_ElevatorSpeedRamp = Math.min(d_ElevatorSpeedRamp + 0.1, 1.0);
-            }
+            d_ElevatorSpeedRamp = Math.min(d_ElevatorSpeedRamp + 0.1, 1.0);
             speed = Math.min(Math.max(speed, -0.75 * d_ElevatorSpeedRamp), 0.75 * d_ElevatorSpeedRamp); // Clamp speed
             if (!dio_LimitSwitch.get()) {
                 m_LeftElevatorMotor.set(0);
-                m_RightElevatorMotor.set(0);
+                //m_RightElevatorMotor.set(0);
             }
             else {
                 m_LeftElevatorMotor.set(speed);
-                m_RightElevatorMotor.set(speed);
+                //m_RightElevatorMotor.set(speed);
             }
         }
         else {
@@ -100,7 +100,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             leftSupply = l;
             SmartDashboard.putNumber("Elevator - Left Supply", leftSupply);
             System.out.println("left "+leftSupply);
-            if (leftSupply > d_ElevatorCurrentLimit) { // && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
+            if ((isMovingUp() && leftSupply > d_ElevatorCurrentLimit_up) || (!isMovingUp() && leftSupply > d_ElevatorCurrentLimit_down)) { // && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
                 // m_LeftElevatorMotor.setPosition(0, 0);
                 // m_RightElevatorMotor.setPosition(0, 0);
                 // leftSupply = 0;
@@ -113,7 +113,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Elevator - Right Supply", rightSupply);
             rightSupply = r;
             System.out.println("right "+rightSupply);
-            if (rightSupply > d_ElevatorCurrentLimit) { // && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
+            if ((isMovingUp() && rightSupply > d_ElevatorCurrentLimit_up) || (!isMovingUp() && rightSupply > d_ElevatorCurrentLimit_down)) { // && getElevatorLevel() == Level.Stow && getEncoderValue() > getTargetLevel().value) {
                 // m_LeftElevatorMotor.setPosition(0, 0);
                 // m_RightElevatorMotor.setPosition(0, 0);
                 // rightSupply = 0;
@@ -136,15 +136,15 @@ public class ElevatorSubsystem extends SubsystemBase {
      * @return
      */
     public double getEncoderValue() {
-        double target = getTargetLevel().value;
+        //double target = getTargetLevel().value;
         double left = m_LeftElevatorMotor.getPosition().getValueAsDouble();
-        double right = m_RightElevatorMotor.getPosition().getValueAsDouble();
-        if (Math.abs(target - left) < Math.abs(target - right)) {
+        //double right = m_RightElevatorMotor.getPosition().getValueAsDouble();
+        //if (Math.abs(target - left) < Math.abs(target - right)) {
             return left;
-        }
-        else {
-            return right;
-        }
+        //}
+        //else {
+        //    return right;
+        //}
     }
 
     /**
@@ -211,29 +211,29 @@ public class ElevatorSubsystem extends SubsystemBase {
         leftSupply = 0;
         rightSupply = 0;
         if (b_GoingUp) {
-            System.out.println("Going UP");
-            switch(getElevatorLevel()) {
-                case Stow : 
-                    l_TargetLevel = Level.Stow;
-                    break;
-                case Coral1: 
-                    l_TargetLevel = Level.Stow;
-                    break;
-                case Coral2:
-                    l_TargetLevel = Level.Coral1;
-                    break;
-                case Coral3:
-                case Algea1:
-                    l_TargetLevel = Level.Coral2;
-                    break;
-                case Coral4: 
-                case Algea2:
-                    l_TargetLevel = Level.Coral3;
-                    break;
-                case LevelBarge:
-                    l_TargetLevel = Level.Coral4;
-                    break;
-            }
+            // System.out.println("Going UP");
+            // switch(getElevatorLevel()) {
+            //     case Stow : 
+            //         l_TargetLevel = Level.Stow;
+            //         break;
+            //     case Coral1: 
+            //         l_TargetLevel = Level.Stow;
+            //         break;
+            //     case Coral2:
+            //         l_TargetLevel = Level.Coral1;
+            //         break;
+            //     case Coral3:
+            //     case Algea1:
+            //         l_TargetLevel = Level.Coral2;
+            //         break;
+            //     case Coral4: 
+            //     case Algea2:
+            //         l_TargetLevel = Level.Coral3;
+            //         break;
+            //     case LevelBarge:
+            //         l_TargetLevel = Level.Coral4;
+            //         break;
+            // }
         }
         
         else {
@@ -245,23 +245,25 @@ public class ElevatorSubsystem extends SubsystemBase {
                     rightSupply = 0;
                     leftSupply = 0;
                     break;
-                case Coral1: 
-                    l_TargetLevel = Level.Coral2;
+                default:
                     break;
-                case Coral2:
-                    l_TargetLevel = Level.Coral3;
-                    break;
-                case Coral3:
-                case Algea1:
-                    l_TargetLevel = Level.Coral4;
-                    break;
-                case Coral4: 
-                case Algea2:
-                    l_TargetLevel = Level.LevelBarge;
-                    break;
-                case LevelBarge:
-                    l_TargetLevel = Level.LevelBarge;
-                    break;
+                // case Coral1: 
+                //     l_TargetLevel = Level.Coral2;
+                //     break;
+                // case Coral2:
+                //     l_TargetLevel = Level.Coral3;
+                //     break;
+                // case Coral3:
+                // case Algea1:
+                //     l_TargetLevel = Level.Coral4;
+                //     break;
+                // case Coral4: 
+                // case Algea2:
+                //     l_TargetLevel = Level.LevelBarge;
+                //     break;
+                // case LevelBarge:
+                //     l_TargetLevel = Level.LevelBarge;
+                //     break;
             }
         }
         System.out.println("Retreat to "+l_TargetLevel.name());
