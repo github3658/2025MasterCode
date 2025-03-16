@@ -64,9 +64,14 @@ public class AutonomousPrograms {
           new WaitForDelay(0.1),
           new ParallelCommandGroup(
             new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackup)
-          ),
-          new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackupSpin)
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStation),
+            new ButtonPanelPressCommand(Button.CoralIn, true).repeatedly().until(() -> s_EndEffector.hasCoral())
+          )
+          // new ParallelCommandGroup(
+          //   new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
+          //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackup)
+          // ),
+          // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackupSpin)
           )
         );
     }
