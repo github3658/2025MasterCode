@@ -282,12 +282,15 @@ double counter = 0.0;
   public void testPeriodic() {
     if (Math.random() < d_MoleRate) {
       int b = ((int) Math.floor(Math.random() * 13)) + 1;
-      i_MolesUp[b-1] = 1;
+      i_MolesUp[b-1] = Math.max(i_MolesUp[b-1], 1);
     }
 
     int i = 0;
     s_EndEffector.beep(false);
     for (Button button : Button.values()) {
+      if (i >= 13) {
+        continue;
+      }
       if (b_GameOver) {
         i_GameOverTimer ++;
         bp_Operator.setIndicatorLight(button, (i_GameOverTimer % 10 < 5) && i_GameOverTimer < 60);
@@ -312,11 +315,11 @@ double counter = 0.0;
         if (i_MolesUp[i] > 0) {
           i_MolesUp[i] ++;
         }
-        if (i_MolesUp[i] > 100) {
+        if (i_MolesUp[i] > 150) {
           b_GameOver = true;
         }
       }
-      bp_Operator.setIndicatorLight(button, (i_MolesUp[i] > 0 && i_MolesUp[i] < 50) || (i_MolesUp[i] % 10 < 5));
+      bp_Operator.setIndicatorLight(button, (i_MolesUp[i] > 0 && i_MolesUp[i] < 100) || (i_MolesUp[i] % 10 > 5));
       i++;
     }
     d_MoleRate *= 1.0001;

@@ -15,8 +15,8 @@ import frc.robot.commands.EndoFactorDefaultCommand;
 public class AutonomousPrograms {
     public static SequentialCommandGroup auto_Test1(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {
       return new SequentialCommandGroup(
-        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTest)
-        // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurn)
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTest),
+        new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurnTest)
       );
     }
 
@@ -64,7 +64,8 @@ public class AutonomousPrograms {
           new ParallelCommandGroup(
             new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
             new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackup)
-          )
+          ),
+          new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackupSpin)
           // new ParallelCommandGroup(
           //   new SequentialCommandGroup(
           //     new WaitForDelay(0.1),
@@ -153,28 +154,28 @@ public class AutonomousPrograms {
                 new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef10ABackup),
                 // Move to algae position
                 new SequentialCommandGroup(
-                  new WaitForDelay(0.1),
+                  new WaitForDelay(0.75),
                   new ButtonPanelPressCommand(Button.ElevatorPosition3, true),
-                  new ButtonPanelPressCommand(Button.ClawPositionAlgae, true)
+                  new ButtonPanelPressCommand(Button.ClawPositionAlgae, true),
+                  new WaitForDelay(0.05)
                 )
               ),
-              new WaitForDelay(0.05),
               new WaitForTrue(() -> s_Elevator.isFinished()),
               new WaitForTrue(() -> s_EndEffector.isFinished()),
               new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef10AlgaeBackup),
               // Intake algae
               new ButtonPanelPressCommand(Button.AlgaeIn, true),
-              new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef10Algae),
-              new WaitForTrue(() -> s_EndEffector.likelyHasAlgae()),
+              new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef10Algae).until(() -> s_EndEffector.likelyHasAlgae()),
+              new WaitForTrue(() -> s_EndEffector.likelyHasAlgae()).withTimeout(3.5),
               new LogLocationCommand(s_Swerve, "GOT ALGAE"),
               // Go to processor
-              new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin),
+              new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin, 0.30),
               //new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef10AlgaeBackup),
               new ButtonPanelPressCommand(Button.ElevatorPosition2, true),
               new DriveToPoseCommand(s_Swerve, s_Elevator, Position.FaceProcessor),
               new ButtonPanelPressCommand(Button.AlgaeIn, false),
               new ButtonPanelPressCommand(Button.AlgaeOut, true),
-              new WaitForDelay(2.0),
+              new WaitForDelay(1.0),
               new ButtonPanelPressCommand(Button.AlgaeOut, false),
               new WaitForDelay(0.05),
               new ButtonPanelPressCommand(Button.ClawPositionCoral, true),

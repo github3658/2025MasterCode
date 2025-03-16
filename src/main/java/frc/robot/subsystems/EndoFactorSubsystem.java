@@ -236,12 +236,14 @@ public class EndoFactorSubsystem extends SubsystemBase {
         return t_AlgaePulseTimer.isRunning();
     }
 
+    private MusicTone mt_440 = new MusicTone(440);
+    private MusicTone mt_0 = new MusicTone(0);
     public void beep(boolean beeping) {
         if (DriverStation.isTestEnabled() && beeping) {
-            m_DeliveryMotor.setControl(new MusicTone(440));
+            m_DeliveryMotor.setControl(mt_440);
         }
         else {
-            m_DeliveryMotor.setControl(new MusicTone(0));
+            m_DeliveryMotor.setControl(mt_0);
         }
     }
 

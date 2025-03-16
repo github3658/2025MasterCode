@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem.Level;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -23,19 +24,20 @@ public class DriveToPoseCommand extends Command {
         PulloutTurnTest(0, 0, 90),
 
         // CENTER ONLY
-        Reef10ACoral(2.875, 0, 0), 
+        Reef10ACoral(2.925, 0, 0), 
         Reef10ABackup(2, 0, 0),
-        Reef10AlgaeBackup(2, -0.65, 0),
-        Reef10Algae(3.2, -0.65, 0, 0.35),
-        FaceProcessor(2.65, 6.3, 90),
-        FleeFromProcessor(5.0, 6.0, 90),
+        Reef10AlgaeBackup(2, -0.45, 0),
+        Reef10Algae(3.2, -0.45, 0, 0.5),
+        FaceProcessor(2.65, 6.4, 90),
+        FleeFromProcessor(5.0, 5.75, 90),
         
         // RIGHT ONLY
-        Reef9ACoral(4.544, -5.189, -58.9),
-        CoralStationBackup(11.861, -2.722, -125.75),
-        CoralStation(12.90, -1.70, -125.75),
-        Reef8ACoral(7.1, -6.025, -119.9),
-        Reef8ABackup(8.1, -5.025, -119.9),
+        Reef9ACoral(4.334, -5.421, -59.385),
+        CoralStationBackup(12.00, -2.542, -124.75),
+        CoralStation(12.6575, -1.906, -124.75),
+        Reef8ACoral(6.88, -6.433, -124.25),
+        Reef8ABackup(7.671, -5.883, -124.25),
+        Reef8ABackupSpin(7.671, -5.883, -180),
 
 
         // LEFT ONLY
@@ -104,7 +106,12 @@ public class DriveToPoseCommand extends Command {
         s_Swerve = s;
         s_Elevator = e;
         p_Target = target;
-        p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+            p_TargetPose = new Pose2d(new Translation2d(-target.x, target.y), new Rotation2d(target.angle));
+        }
+        else {
+            p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
+        }
         addRequirements(s_Swerve);
     }
 
@@ -112,7 +119,12 @@ public class DriveToPoseCommand extends Command {
         s_Swerve = s;
         s_Elevator = e;
         p_Target = target;
-        p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
+        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+            p_TargetPose = new Pose2d(new Translation2d(-target.x, target.y), new Rotation2d(target.angle));
+        }
+        else {
+            p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
+        }
         c_SwerveRampDeadzone = deadzone;
         addRequirements(s_Swerve);
     }
@@ -138,19 +150,16 @@ public class DriveToPoseCommand extends Command {
 
         double elevatorSpeedReduction = (s_Elevator.getEncoderValue()/Level.Coral4.value)*0.35; // From 0 to 1 (0% to 100%), how much do we reduce swerve speed?
         
-        if (DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-            s_Swerve.setControl(drive_field.
-                withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
-                .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
-                .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
-            );
-        } else {
-            s_Swerve.setControl(drive_field.
-                withVelocityX(d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
-                .withVelocityY(d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
-                .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
-            );
+        double blueAlliance = 1;
+        if (DriverStation.getAlliance().get() == Alliance.Blue) {
+            blueAlliance = -1;
         }
+
+        s_Swerve.setControl(drive_field.
+            withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) * blueAlliance *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
+            .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * blueAlliance * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
+            .withRotationalRate(d_Rotate * d_SwerveRamp * blueAlliance * c_MaxSwerveAngularRate)
+        );
 
         // System.out.println("Can Coder: " + s_Swerve.getModule(0).getEncoder().getPosition().getValueAsDouble());
         // System.out.println("X POS: " + s_Swerve.getState().Pose.getX());
@@ -161,7 +170,7 @@ public class DriveToPoseCommand extends Command {
     @Override
     public boolean isFinished() {
         i_Frames++;
-        return (Math.abs(d_Forward) < c_SwerveRampDeadzone && Math.abs(d_Strafe) < c_SwerveRampDeadzone && Math.abs(d_Rotate) < c_SwerveRampDeadzone && i_Frames > 5);
+        return (Math.abs(d_Forward) < c_SwerveRampDeadzone && Math.abs(d_Strafe) < c_SwerveRampDeadzone && Math.abs(d_Rotate) < c_SwerveRampDeadzone && i_Frames > 12);
     }
 
     @Override
