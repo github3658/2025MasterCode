@@ -30,14 +30,14 @@ public class DriveToPoseCommand extends Command {
         Reef10Algae(3.2, -0.45, 0, 0.5),
         FaceProcessor(2.65, 6.4, 90),
         FleeFromProcessor(5.0, 5.75, 90),
-        
+
         // RIGHT ONLY
-        Reef9ACoral(4.334, -5.421, -59.385),
-        CoralStationBackup(12.00, -2.542, -124.75),
-        CoralStation(12.6575, -1.906, -124.75),
-        Reef8ACoral(6.88, -6.433, -124.25),
-        Reef8ABackup(7.671, -5.883, -124.25),
-        Reef8ABackupSpin(7.671, -5.883, -180),
+        Reef9ACoral(4.645, -5.270, -60.105),
+        CoralStationBackup(5.645, -2.542, -124.75),
+        CoralStation(11.367, -0.556, -124.75),
+        Reef8ACoral(6.94, -5.574, -120.08),
+        Reef8ABackup(6.94, -3.883, -120.08),
+        Reef8ABackupSpin(6.94, -3.883, -180),
 
 
         // LEFT ONLY
