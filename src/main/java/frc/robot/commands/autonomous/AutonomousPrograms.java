@@ -44,13 +44,14 @@ public class AutonomousPrograms {
           new LogLocationCommand(s_Swerve, "DROP OFF CORAL 1"),
           new ButtonPanelPressCommand(Button.CoralOut, true),
           new WaitForDelay(0.1),
+          // new ParallelCommandGroup(
+          //   new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
+          //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStationBackup)
+          // ),
           new ParallelCommandGroup(
             new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStationBackup)
-          ),
-          new ParallelCommandGroup(
-            new ButtonPanelPressCommand(Button.CoralIn, true).repeatedly().until(() -> s_EndEffector.hasCoral()),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStation)
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStation),
+            new ButtonPanelPressCommand(Button.CoralIn, true).repeatedly().until(() -> s_EndEffector.hasCoral())
           ),
           new LogLocationCommand(s_Swerve, "INTAKE CORAL"),
           new ParallelCommandGroup(
@@ -66,22 +67,7 @@ public class AutonomousPrograms {
             new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackup)
           ),
           new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackupSpin)
-          // new ParallelCommandGroup(
-          //   new SequentialCommandGroup(
-          //     new WaitForDelay(0.1),
-          //     new ButtonPanelPressCommand(Button.ElevatorPosition4, true)
-          //   ),
-          //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ACoral)
-          // ),
-          // new ButtonPanelPressCommand(Button.CoralOut, true),
-          // new WaitForDelay(0.25),
-          // new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ABackup),
-          // new ButtonPanelPressCommand(Button.Stow, true)
-            //   new ParallelCommandGroup(
-            //     new ButtonPanelPressCommand(Button.Stow, true),
-            //     new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStation)
-            //   )
-            )
+          )
         );
     }
 
