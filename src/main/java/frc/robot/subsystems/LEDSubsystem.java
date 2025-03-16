@@ -4,7 +4,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
 
 import com.ctre.phoenix.led.CANdle;
-// IMPORTANT: com.ctre.phoenix not resolving is probably a quirk with a VS Code extension. The code builds fine.
+// com.ctre.phoenix not resolving is probably a quirk with a VS Code extension. The code builds fine.
+// This no longer seems to happen in 2025.
 
 public class LEDSubsystem extends SubsystemBase {
     /**

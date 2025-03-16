@@ -13,7 +13,7 @@ public class ClimbSubsystem extends SubsystemBase {
     private TalonFX m_LiftMotor = new TalonFX(Config.kLiftMotor, Config.kCanbus);
 
     public ClimbSubsystem() {
-        m_LiftMotor.setNeutralMode(NeutralModeValue.Brake);
+        m_LiftMotor.setNeutralMode(NeutralModeValue.Coast);
     }
 
     @Override
