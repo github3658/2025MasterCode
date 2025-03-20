@@ -31,7 +31,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
             new CANrangeConfiguration()
                 .withProximityParams(
                     new ProximityParamsConfigs()
-                        .withProximityThreshold(0.05)
+                        .withProximityThreshold(0.10) //Changed to 0.1 for increased detection distance. Was 0.05 although that gave a possibility of detection distance dipping below the coral.
                         .withProximityHysteresis(0.01)
                 )
                 .withFovParams(
@@ -353,7 +353,7 @@ public void runPivotToPose(PivotTarget target) {
         SmartDashboard.putString("Endofactor - target position", pt_PivotTarget.name());
         SmartDashboard.putBoolean("Endofactor - is safe?", isSafe());
         SmartDashboard.putBoolean("Endofactor - has coral?", hasCoral());
-        SmartDashboard.putNumber("Endofactor - measure", s_DeliveryRange.getDistance().getValueAsDouble());
+        SmartDashboard.putNumber("Endofactor - measure CORAL DISTANCE", s_DeliveryRange.getDistance().getValueAsDouble());
         //SmartDashboard.putNumber("Endofactor - Delivery stator current", m_DeliveryMotor.getStatorCurrent().getValueAsDouble());
         //SmartDashboard.putNumber("Endofactor - Delivery voltage", m_DeliveryMotor.getMotorVoltage().getValueAsDouble());
         if (maxDeliveyCurrent < m_DeliveryMotor.getSupplyCurrent().getValueAsDouble()) 
