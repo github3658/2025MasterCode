@@ -39,7 +39,6 @@ public class DriveToPoseCommand extends Command {
         Reef8ABackup(6.94, -3.883, -120.08),
         Reef8ABackupSpin(6.94, -3.883, -180),
 
-
         // LEFT ONLY
         Reef11ACoral(4.544, 5.189, 58.9),
         invCoralStationBackup(11.861, 2.722, 125.75),
@@ -47,6 +46,8 @@ public class DriveToPoseCommand extends Command {
         Reef12ACoral(7.1, 6.025, 119.9),
         Reef12ABackup(8.1, 5.025, 119.9),
 // TODO: Check in practice field for alignment.
+
+        //Idea_Test(-1 * Reef8ACoral.x, -1 *Reef8ACoral.y, -1 * Reef8ACoral.angle),
 
         ;
         public double x, y, angle, maxspeed;
