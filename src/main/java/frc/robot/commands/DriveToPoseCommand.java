@@ -16,6 +16,8 @@ import frc.robot.subsystems.SwerveDrivetrainSubsystem;
 public class DriveToPoseCommand extends Command {
     // These are the positions the robot should drive to.
     // The origin is the center of the field, behind the robot starting line.
+    private boolean b_FieldInversion;
+    
     public enum Position {
         // Can be used from any starting position
         Origin(0, 0, 0),
@@ -40,15 +42,12 @@ public class DriveToPoseCommand extends Command {
         Reef8ABackupSpin(6.94, -3.883, -180),
 
         // LEFT ONLY
-        Reef11ACoral(4.544, 5.189, 58.9),
-        invCoralStationBackup(11.861, 2.722, 125.75),
-        invCoralStation(12.90, 1.70, 125.75),
-        Reef12ACoral(7.1, 6.025, 119.9),
-        Reef12ABackup(8.1, 5.025, 119.9),
+        Reef11ACoral(Reef9ACoral.x, -Reef9ACoral.y, -Reef9ACoral.angle),
+        invCoralStationBackup(CoralStationBackup.x, -CoralStationBackup.y, -CoralStationBackup.angle),
+        invCoralStation(CoralStation.x, -CoralStation.y, -CoralStation.angle),
+        Reef12ACoral(Reef8ACoral.x, -Reef8ACoral.y, -Reef8ACoral.angle),
+        Reef12ABackup(Reef8ABackup.x, -Reef8ABackup.y, -Reef8ABackup.angle)
 // TODO: Check in practice field for alignment.
-
-        //Idea_Test(-1 * Reef8ACoral.x, -1 *Reef8ACoral.y, -1 * Reef8ACoral.angle),
-
         ;
         public double x, y, angle, maxspeed;
         public Pose2d pose;
@@ -108,7 +107,7 @@ public class DriveToPoseCommand extends Command {
         s_Elevator = e;
         p_Target = target;
         if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
-            p_TargetPose = new Pose2d(new Translation2d(-target.x, target.y), new Rotation2d(target.angle));
+            p_TargetPose = new Pose2d(new Translation2d(-target.x, -target.y), new Rotation2d(-target.angle));
         }
         else {
             p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));

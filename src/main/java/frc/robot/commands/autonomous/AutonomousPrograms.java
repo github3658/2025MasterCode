@@ -85,7 +85,7 @@ public class AutonomousPrograms {
 
         new SequentialCommandGroup (
           new ParallelCommandGroup(
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef11ACoral), 
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef11ACoral),
             new ButtonPanelPressCommand(Button.ElevatorPosition4, true)
           ), 
           new WaitForTrue(() -> s_Elevator.isFinished()),
@@ -93,13 +93,14 @@ public class AutonomousPrograms {
           new LogLocationCommand(s_Swerve, "DROP OFF CORAL 1"),
           new ButtonPanelPressCommand(Button.CoralOut, true),
           new WaitForDelay(0.1),
+          // new ParallelCommandGroup(
+          //   new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
+          //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.CoralStationBackup)
+          // ),
           new ParallelCommandGroup(
             new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.invCoralStationBackup)
-          ),
-          new ParallelCommandGroup(
-            new ButtonPanelPressCommand(Button.CoralIn, true).repeatedly().until(() -> s_EndEffector.hasCoral()),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.invCoralStation)
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.invCoralStation),
+            new ButtonPanelPressCommand(Button.CoralIn, true).repeatedly().until(() -> s_EndEffector.hasCoral())
           ),
           new LogLocationCommand(s_Swerve, "INTAKE CORAL"),
           new ParallelCommandGroup(
@@ -112,7 +113,8 @@ public class AutonomousPrograms {
           new WaitForDelay(0.1),
           new ParallelCommandGroup(
             new WaitForDelay(0.5).andThen(new ButtonPanelPressCommand(Button.Stow, true)),
-            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef12ABackup)
+            new DriveToPoseCommand(s_Swerve, s_Elevator, Position.invCoralStation),
+            new ButtonPanelPressCommand(Button.CoralIn, true).repeatedly().until(() -> s_EndEffector.hasCoral())
           )
         )
       );

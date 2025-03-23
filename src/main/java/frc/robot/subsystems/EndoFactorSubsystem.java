@@ -31,7 +31,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
             new CANrangeConfiguration()
                 .withProximityParams(
                     new ProximityParamsConfigs()
-                        .withProximityThreshold(0.10) //Changed to 0.1 for increased detection distance. Was 0.05 although that gave a possibility of detection distance dipping below the coral.
+                        .withProximityThreshold(0.07) //Changed to 0.1 for increased detection distance. Was 0.05 although that gave a possibility of detection distance dipping below the coral.
                         .withProximityHysteresis(0.01)
                 )
                 .withFovParams(
@@ -336,6 +336,11 @@ public void runPivotToPose(PivotTarget target) {
     }
 
     public boolean hasCoral() {
+        if (s_DeliveryRange.getIsDetected().getValue()) {
+            SmartDashboard.putNumber("Detected Distance", s_DeliveryRange.getDistance().getValueAsDouble());
+            SmartDashboard.putNumber("Coral_In_Strength", s_DeliveryRange.getSignalStrength().getValueAsDouble());
+        }
+        SmartDashboard.putNumber("Coral Signal Strength", s_DeliveryRange.getSignalStrength().getValueAsDouble());
         return s_DeliveryRange.getIsDetected().getValue();
     }
 
