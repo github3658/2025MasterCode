@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import frc.robot.Logger;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.ButtonPanel;
 import frc.robot.ButtonPanel.Button;
@@ -91,6 +93,7 @@ public class EndoFactorDefaultCommand extends Command {
             //System.out.println("AlgaeIn");
             if (s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntake) || s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntakeStow)) {
                 s_EndEffector.intakeAlgae();
+                Logger.writeString("Intake Algea", "Intake Algea");
             }
             else {
                 s_EndEffector.setPivot(pt_AlgaeTarget);
@@ -99,6 +102,7 @@ public class EndoFactorDefaultCommand extends Command {
         else if (bp_Operator.getButtonPressed(Button.CoralIn) && !s_EndEffector.getIsIntakeDisabled() && s_Elevator.getElevatorLevel() == Level.Stow) {
             //System.out.println("Coral In");
             s_EndEffector.intakeCoral();
+            Logger.writeString("Intake Coral", "Intake Coral");
         }
 
         s_EndEffector.timerExecute().runIntakeToPose();
@@ -110,6 +114,8 @@ public class EndoFactorDefaultCommand extends Command {
             if (s_EndEffector.isPivotTarget(EndoFactorSubsystem.PivotTarget.AlgaeIntake) || s_EndEffector.isPivotTarget(EndoFactorSubsystem.PivotTarget.AlgaeIntakeStow)) {
                 s_EndEffector.ejectAlgae();
                 s_EndEffector.canGoToCoralPos(true);
+
+                Logger.writeString("Output Algea", "Output Algea");
             }
             else {
                 s_EndEffector.setPivot(pt_AlgaeTarget);
@@ -119,6 +125,7 @@ public class EndoFactorDefaultCommand extends Command {
             //System.out.println("Coral Out");
             if (s_EndEffector.isPivotTarget(pt_IdealTarget) || s_EndEffector.isSafe()) {
                 s_EndEffector.ejectCoral();
+                Logger.writeString("Output Coral", "Output Coral");
             }
             else {
                 s_EndEffector.setPivot(pt_IdealTarget);
@@ -127,6 +134,8 @@ public class EndoFactorDefaultCommand extends Command {
 
         if (bp_Operator.getButton(Button.AlgaeOut) == false && bp_Operator.getButton(Button.AlgaeIn) == false && !s_EndEffector.isAlgaePulseRunning() && (s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntake) || s_EndEffector.isPivotTarget(PivotTarget.AlgaeIntakeStow))) {
             s_EndEffector.stopAlgaeDelivery();
+
+            Logger.writeString("Algea Stopped", "Algea Stopped");
         }
 
         // Level 4 automatic

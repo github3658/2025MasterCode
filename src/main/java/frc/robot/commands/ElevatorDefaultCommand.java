@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import frc.robot.Logger;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.ButtonPanel;
 import frc.robot.ButtonPanel.Button;
@@ -39,6 +41,7 @@ public class ElevatorDefaultCommand extends Command {
         // so it's okay to use the setLevel function like this.
         if (bp_Operator.getButtonPressed(Button.Stow)) {
             s_Elevator.setLevel(Level.Stow);
+            Logger.writeString("Level Stow", "Level Stow");
             // Doing this for the safety of the robot
             if (s_EndEffector.getPivotTarget() == PivotTarget.AlgaeIntake) {
                 s_EndEffector.setPivot(PivotTarget.SafetyTarget);
@@ -46,24 +49,30 @@ public class ElevatorDefaultCommand extends Command {
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPosition2)) {
             s_Elevator.setLevel(Level.Coral2);
+            Logger.writeString("Level Coral2", "Level Coral2");
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPosition3)) {
             s_Elevator.setLevel(Level.Coral3);
+            Logger.writeString("Level Coral3", "Level Coral3");
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPosition4)) {
             s_Elevator.setLevel(Level.Coral4);
+            Logger.writeString("Level Coral4", "Level Coral4");
         }
         else if (bp_Operator.getButtonPressed(Button.ElevatorPositionBarge)) {
             s_Elevator.setLevel(Level.LevelBarge);
+            Logger.writeString("Level Barge", "Level Barge");
         }
 
         // Modified positions for algae.
         if (s_EndEffector.getPivotTarget() == PivotTarget.AlgaeIntake) {
             if (s_Elevator.getTargetLevel() == Level.Coral3) {
                 s_Elevator.setLevel(Level.Algea1);
+                Logger.writeString("Level Algea1", "Level Algea1");
             }
             else if (s_Elevator.getTargetLevel() == Level.Coral4) {
                 s_Elevator.setLevel(Level.Algea2);
+                Logger.writeString("Level Algea2", "Level Algea2");
             }
         }
     }

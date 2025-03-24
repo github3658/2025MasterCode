@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import frc.robot.Logger;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
@@ -156,7 +158,9 @@ public class DriveToPoseCommand extends Command {
         if (DriverStation.getAlliance().get() == Alliance.Blue) {
             blueAlliance = -1;
         }
-
+        Logger.writeDouble("X Position", currentPose.getX());
+        Logger.writeDouble("Y Position", currentPose.getY());
+        Logger.writeDouble("Rotation", currentPose.getRotation().getRadians());
         s_Swerve.setControl(drive_field.
             withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) * blueAlliance *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
             .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * blueAlliance * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)

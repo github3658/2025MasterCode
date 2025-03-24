@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
+import frc.robot.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
     // Up and down, reads limit switches
@@ -220,7 +221,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         leftSupply = 0;
         rightSupply = 0;
         if (b_GoingUp) {
-            // System.out.println("Going UP");
+            System.out.println("Going UP");
+            Logger.writeString("Elevator Safety (UP)", "Elevator Safety (UP)");
             // switch(getElevatorLevel()) {
             //     case Stow : 
             //         l_TargetLevel = Level.Stow;
@@ -247,6 +249,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         
         else {
             System.out.println("Going DOWN");
+            Logger.writeString("Elevator Safety (DOWN)", "Elevator Safety (DOWN)");
             switch(getElevatorLevel()) {
                 case Stow : 
                     m_LeftElevatorMotor.setPosition(0, 0);
@@ -276,6 +279,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             }
         }
         System.out.println("Retreat to "+l_TargetLevel.name());
+        Logger.writeString("Retreat to", l_TargetLevel.name());
     }
 }
 //endregion

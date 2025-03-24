@@ -48,6 +48,8 @@ public class Robot extends TimedRobot {
   //region RobotInit
   @Override
   public void robotInit() {
+    Logger.writeString("Robot Init", "Robot Init");
+    Logger.initLogger();
     s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, s_Elevator, xb_Driver));
     s_Elevator.setDefaultCommand(new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector));
     s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
@@ -59,6 +61,7 @@ public class Robot extends TimedRobot {
   //region RobotPeriodic
   @Override
   public void robotPeriodic() {
+    Logger.writeString("Robot Periodic", "Robot Periodic");
     SmartDashboard.putNumber("-BOT X", s_Swerve.getState().Pose.getX());
     SmartDashboard.putNumber("-BOT Y", s_Swerve.getState().Pose.getY());
     SmartDashboard.putNumber("-BOT ROTATION", s_Swerve.getState().Pose.getRotation().getDegrees());
@@ -115,17 +118,24 @@ public class Robot extends TimedRobot {
   //endregion
   //region Disabled
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    Logger.writeString("Disabled Init", "Disabled Init");
+  }
   
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+    Logger.writeString("Disabled Periodic", "Disabled Periodic");
+  }
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() {
+    Logger.writeString("Disabled Exit", "Disabled Exit");
+  }
   //endregion
   //region AutonInit
   @Override
   public void autonomousInit() {
+    Logger.writeString("Autonomous Init", "Autonomous Init");
     // We'll count the reef faces from 1 to 6
     s_Swerve.resetPose(new Pose2d());
 
@@ -192,6 +202,7 @@ public class Robot extends TimedRobot {
   //region AutonPeriodic
   @Override
   public void autonomousPeriodic() {
+    Logger.writeString("Autonomous Periodic", "Autonomous Periodic");
     // boolean hasTarget = LimelightHelpers.getTV(Config.kLimelight);
 
   //   if (hasTarget) {

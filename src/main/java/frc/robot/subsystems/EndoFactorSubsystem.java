@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
+import frc.robot.Logger;
 import frc.robot.subsystems.LEDSubsystem.Color;
 
 public class EndoFactorSubsystem extends SubsystemBase {
@@ -335,12 +336,9 @@ public void runPivotToPose(PivotTarget target) {
     }
 
     public boolean hasCoral() {
-        // if (s_DeliveryRange.getIsDetected().getValue()) {
-        //     SmartDashboard.putNumber("Detected Distance", s_DeliveryRange.getDistance().getValueAsDouble());
-        //     SmartDashboard.putNumber("Coral_In_Strength", s_DeliveryRange.getSignalStrength().getValueAsDouble());
-        // }
-        SmartDashboard.putNumber("Coral Signal Strength", s_DeliveryRange.getSignalStrength().getValueAsDouble());
-        return s_DeliveryRange.getIsDetected().getValue() && (s_DeliveryRange.getSignalStrength().getValueAsDouble() > 50000);
+        boolean isDetected = s_DeliveryRange.getIsDetected().getValue() && (s_DeliveryRange.getSignalStrength().getValueAsDouble() > 50000);
+        Logger.writeBoolean("Has Coral", isDetected);
+        return isDetected;
 
     }
 
