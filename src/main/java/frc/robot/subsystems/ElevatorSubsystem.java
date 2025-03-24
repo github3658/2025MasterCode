@@ -21,7 +21,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     private TalonFX m_RightElevatorMotor = new TalonFX(Config.kRightElevatorMotor, Config.kCanbus);
     private DigitalInput dio_LimitSwitch = new DigitalInput(Config.kElevatorLimitSwitch);
 
-
+    //region Level
     public enum Level {
         Stow(0),
         Coral1(0),
@@ -36,7 +36,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             this.value = value;
         }
     }
-
+    //endregion
     private final double c_AcceptableEncoderRange = 0.75;
 
     private boolean b_locked;
@@ -51,7 +51,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         setElevatorConfig();
         m_RightElevatorMotor.setControl(new Follower(Config.kLeftElevatorMotor, false));
     }
-
+    //region ElevatorConfig
     private void setElevatorConfig() {
         TalonFXConfiguration cElevatorMotorConfig = new TalonFXConfiguration();
         cElevatorMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -60,13 +60,14 @@ public class ElevatorSubsystem extends SubsystemBase {
         m_LeftElevatorMotor.getConfigurator().apply(cElevatorMotorConfig);
         m_RightElevatorMotor.getConfigurator().apply(cElevatorMotorConfig);
     }
-
+    //endregion
 
     double leftSupply;
     double rightSupply;
     double d_ElevatorCurrentLimit_down = 53.0;
     double d_ElevatorCurrentLimit_up = 70.0;
     double d_ElevatorSpeedRamp = 0.0;
+    //region Periodic
     @Override
     public void periodic() {
         if (!b_locked) {
@@ -88,7 +89,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         else {
             m_LeftElevatorMotor.set(0);
         }
-
+        //endregion
+        //region SmartDashboard
         SmartDashboard.putNumber("Elevator Position", m_LeftElevatorMotor.getPosition().getValueAsDouble());
         SmartDashboard.putBoolean("Elevator - Finished", isFinished());
         SmartDashboard.putBoolean("Elevator - Locked", getLocked());
@@ -96,6 +98,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putString("Elevator - Level CURRENT", getElevatorLevel().name());
         SmartDashboard.putNumber("Elevator - Encoder Error", getTargetLevel().value - getEncoderValue());
         double l = m_LeftElevatorMotor.getSupplyCurrent().getValueAsDouble();
+        //endregion
+        //region Safety
         if (Math.abs(l) > Math.abs(leftSupply)) {
             leftSupply = l;
             SmartDashboard.putNumber("Elevator - Left Supply", leftSupply);
@@ -121,20 +125,22 @@ public class ElevatorSubsystem extends SubsystemBase {
             }
         }
     }
-
+    //endregion
     /**
      * Given an elevator level, will set the elevator subsystem to that level.
      * @param level The level to set.
      */
+    //region Level
     public void setLevel(Level level) {
         d_ElevatorSpeedRamp = 0;
         l_TargetLevel = level;
     }
-
+    //endregion
     /**
      * Returns the value of the elevator motor's encoder.
      * @return
      */
+    //region EncoderValue
     public double getEncoderValue() {
         //double target = getTargetLevel().value;
         double left = m_LeftElevatorMotor.getPosition().getValueAsDouble();
@@ -146,11 +152,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         //    return right;
         //}
     }
-
+    //endregion
     /**
      * Returns the closest reef level (1-Barge).
      * @return
      */
+    //region Elevator Level
     public Level getElevatorLevel() {
         double v = getEncoderValue();
         double distance = 999999;
@@ -163,15 +170,16 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
         return closest;
     }
-
+    //endregion
     /**
      * Returns the reef level that the elevator is trying to go to (1-5).
      * @return
      */
+    //region Target
     public Level getTargetLevel() {
         return l_TargetLevel;
     }
-
+    //endregion
     /**
      * Return whether the elevator has met its target level
      * @return
@@ -185,10 +193,10 @@ public class ElevatorSubsystem extends SubsystemBase {
      * Disables the elevator from moving or enables the elevator to move.
      * @param lock
      */
+    //region Lock
     public void setLocked(boolean lock) {
         b_locked = lock;
     }
-
     /**
      * Returns whether the elevator is locked.
      * @return
@@ -196,7 +204,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     public boolean getLocked() {
         return b_locked;
     }
-
+    //endregion Lock
+    //region Safety-Extra
     public boolean isMovingUp() {
         if (l_TargetLevel.value > getEncoderValue()) {
             return true;
@@ -269,3 +278,4 @@ public class ElevatorSubsystem extends SubsystemBase {
         System.out.println("Retreat to "+l_TargetLevel.name());
     }
 }
+//endregion

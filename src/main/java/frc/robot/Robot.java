@@ -45,7 +45,7 @@ public class Robot extends TimedRobot {
   private ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
   private EndoFactorSubsystem s_EndEffector = new EndoFactorSubsystem();
   private ClimbSubsystem s_ClimbSubsystem = new ClimbSubsystem();
-
+  //region RobotInit
   @Override
   public void robotInit() {
     s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, s_Elevator, xb_Driver));
@@ -55,7 +55,8 @@ public class Robot extends TimedRobot {
     s_Elevator.setLocked(true);
     CameraServer.startAutomaticCapture();
   }
-  
+  //endregion
+  //region RobotPeriodic
   @Override
   public void robotPeriodic() {
     SmartDashboard.putNumber("-BOT X", s_Swerve.getState().Pose.getX());
@@ -111,16 +112,18 @@ public class Robot extends TimedRobot {
     // }
     // // // // // //
   }
-
+  //endregion
+  //region Disabled
   @Override
   public void disabledInit() {}
-
+  
   @Override
   public void disabledPeriodic() {}
 
   @Override
   public void disabledExit() {}
-
+  //endregion
+  //region AutonInit
   @Override
   public void autonomousInit() {
     // We'll count the reef faces from 1 to 6
@@ -185,7 +188,8 @@ public class Robot extends TimedRobot {
     
     // LimelightHelpers.setPipelineIndex(Config.kLimelight, 0);
   }
-
+  //endregion
+  //region AutonPeriodic
   @Override
   public void autonomousPeriodic() {
     // boolean hasTarget = LimelightHelpers.getTV(Config.kLimelight);
@@ -227,10 +231,11 @@ public class Robot extends TimedRobot {
 
     // SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
   }
-
+  //region AutonExit
   @Override
   public void autonomousExit() {}
-
+  //endregion
+  //region Teleop
   @Override
   public void teleopInit() {
     bp_Operator.AutonCancel();
@@ -244,7 +249,8 @@ double counter = 0.0;
   }
   @Override
   public void teleopExit() {}
-
+  //endregion
+  //region Test
   @Override
   public void testInit() {
     s_Swerve.removeDefaultCommand();
@@ -332,3 +338,4 @@ double counter = 0.0;
   @Override
   public void simulationPeriodic() {}
 }
+//endregion

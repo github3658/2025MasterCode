@@ -17,7 +17,7 @@ public class DriveToPoseCommand extends Command {
     // These are the positions the robot should drive to.
     // The origin is the center of the field, behind the robot starting line.
     private boolean b_FieldInversion;
-    
+    //region Position
     public enum Position {
         // Can be used from any starting position
         Origin(0, 0, 0),
@@ -66,7 +66,7 @@ public class DriveToPoseCommand extends Command {
             this.pose = new Pose2d(new Translation2d(x, y), Rotation2d.fromDegrees(angle));
         }
     }
-
+    //endregion
     // 1 UNIT ~ 50 cm
 
     // The maximum Swerve speed
@@ -101,7 +101,8 @@ public class DriveToPoseCommand extends Command {
 
     private SwerveDrivetrainSubsystem s_Swerve;
     private ElevatorSubsystem s_Elevator;
-
+    
+    //region Drive-to-pose
     public DriveToPoseCommand(SwerveDrivetrainSubsystem s, ElevatorSubsystem e, Position target) {
         s_Swerve = s;
         s_Elevator = e;
@@ -114,7 +115,8 @@ public class DriveToPoseCommand extends Command {
         }
         addRequirements(s_Swerve);
     }
-
+    //endregion
+    //region 2nd Drive-to-pose?
     public DriveToPoseCommand(SwerveDrivetrainSubsystem s, ElevatorSubsystem e, Position target, double deadzone) {
         s_Swerve = s;
         s_Elevator = e;
@@ -128,11 +130,11 @@ public class DriveToPoseCommand extends Command {
         c_SwerveRampDeadzone = deadzone;
         addRequirements(s_Swerve);
     }
-    
+    //endregion
     @Override
     public void initialize() {
     }
-
+    //region Execute
     @Override
     public void execute() {
         Pose2d currentPose = s_Swerve.getState().Pose;
@@ -166,7 +168,7 @@ public class DriveToPoseCommand extends Command {
         // System.out.println("Y POS: " + s_Swerve.getState().Pose.getY());
         // System.out.println("ROT: " + s_Swerve.getState().Pose.getRotation().getDegrees());
     }
-
+    //endregion
     @Override
     public boolean isFinished() {
         i_Frames++;

@@ -102,7 +102,6 @@ public class EndoFactorSubsystem extends SubsystemBase {
 
     //endregion
 
-    //region Methods
     //region Coral
     public EndoFactorSubsystem intakeCoral() {
         if (!b_IsCoralIntakeDisabled) {

@@ -18,6 +18,7 @@ public class LEDSubsystem extends SubsystemBase {
      * <p> White
      * <p> Magenta
      */
+    //region Colors
     public enum Color {
         Green(0, 255, 0),
         Yellow(255, 192, 0),
@@ -35,7 +36,7 @@ public class LEDSubsystem extends SubsystemBase {
         }
     }
     private Color e_ColorTarget;
-
+    //endregion
     /**
      * An enum of configured patterns for the LED subsystem. Includes:
      * <p> Solid
@@ -62,12 +63,14 @@ public class LEDSubsystem extends SubsystemBase {
     /**
      * This is the constructor for the LED subsystem.
      */
+    //region Subsystem
     public LEDSubsystem() {
         e_ColorTarget = Color.White;
         e_PatternTarget = Pattern.Solid;
         m_CANdle.configFactoryDefault();
     }
-
+    //endregion
+    //region Periodic
     @Override
     public void periodic() {
         if (i_Timer <= 0) {
@@ -98,27 +101,29 @@ public class LEDSubsystem extends SubsystemBase {
             Math.round(i_CurrentColor[2]*f_Brightness)
         );       
     }
-
+    //endregion
     /**
      * Get the RGB of the color target.
      * @return
      */
+    //region RGB
     private int[] getRGB() {
         int[] rgb = {e_ColorTarget.r, e_ColorTarget.g, e_ColorTarget.b};
         return rgb;
     }
-
+    //endregion
     /**
      * Sets the color of the LED subsystem using a Color enum value
      * @param color A Color enum value
      */
+    //region SetColor
     public void setColor(Color color) {
         e_ColorTarget = color;
         f_Brightness = 1;
         b_Raw = false;
         i_CurrentColor = getRGB();
     }
-
+    //endregion
     /**
      * Sets the color of the LED subsystem using raw RGB values
      * @param r The red channel
@@ -130,20 +135,23 @@ public class LEDSubsystem extends SubsystemBase {
         i_CurrentColor = array;
         b_Raw = true;
     }
-
+    //endregion
     /**
      * Sets the pattern of the LED subsystem using a Pattern enum value
      * @param pattern A Pattern enum value
      */
+    //region Pattern
     public void setPattern(Pattern pattern) {
         e_PatternTarget = pattern;
     }
-
+    //endregion
     /**
      * Sets the brightness of the LED subsystem using a float of the range 0-1
      * @param brightness A float between 0-1
      */
+    //region Brightness
     public void setBrightness(float brightness) {
         f_Brightness = brightness;
     }
+    //endregion
 }

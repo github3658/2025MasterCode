@@ -11,7 +11,7 @@ import frc.robot.subsystems.EndoFactorSubsystem;
 import frc.robot.subsystems.SwerveDrivetrainSubsystem;
 import frc.robot.commands.ElevatorDefaultCommand;
 import frc.robot.commands.EndoFactorDefaultCommand;
-
+//region Testing
 public class AutonomousPrograms {
     public static SequentialCommandGroup auto_Test1(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {
       return new SequentialCommandGroup(
@@ -19,7 +19,7 @@ public class AutonomousPrograms {
         new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurnTest)
       );
     }
-
+  
     public static SequentialCommandGroup auto_Test2(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {
       return new SequentialCommandGroup(
         new DriveToPoseCommand(s_Swerve, s_Elevator, Position.PulloutTurnTest)
@@ -27,6 +27,8 @@ public class AutonomousPrograms {
       );
     }
 
+    //endregion
+    //region Right
     public static ParallelCommandGroup auto_Right(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator, ButtonPanel bp_Operator, EndoFactorSubsystem s_EndEffector) {
       return new ParallelCommandGroup(
         new ParallelCommandGroup(
@@ -75,7 +77,8 @@ public class AutonomousPrograms {
           )
         );
     }
-
+    //endregion
+    //region Left
     public static ParallelCommandGroup auto_Left(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator, ButtonPanel bp_Operator, EndoFactorSubsystem s_EndEffector) {
       return new ParallelCommandGroup(
         new ParallelCommandGroup(
@@ -119,13 +122,15 @@ public class AutonomousPrograms {
         )
       );
     }
-
+    //endregion
+    //region Line
     public static SequentialCommandGroup auto_Line(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator) {
       return new SequentialCommandGroup(
         new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Pullout)
       );
     }
-
+    //endregion
+    //region Center
     public static ParallelCommandGroup auto_Center(SwerveDrivetrainSubsystem s_Swerve, ElevatorSubsystem s_Elevator, ButtonPanel bp_Operator, EndoFactorSubsystem s_EndEffector) {
         return new ParallelCommandGroup(
             new ParallelCommandGroup(
@@ -178,3 +183,4 @@ public class AutonomousPrograms {
           );
     }
 }
+//endregion
