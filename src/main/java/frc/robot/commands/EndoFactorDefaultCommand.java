@@ -117,7 +117,7 @@ public class EndoFactorDefaultCommand extends Command {
         }
         else if (bp_Operator.getButtonPressed(Button.CoralOut)) {
             //System.out.println("Coral Out");
-            if (s_EndEffector.isPivotTarget(pt_IdealTarget)) {
+            if (s_EndEffector.isPivotTarget(pt_IdealTarget) || s_EndEffector.isSafe()) {
                 s_EndEffector.ejectCoral();
             }
             else {
