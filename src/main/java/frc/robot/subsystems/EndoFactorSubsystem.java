@@ -116,12 +116,12 @@ public class EndoFactorSubsystem extends SubsystemBase {
     }
 
     public EndoFactorSubsystem ejectCoral() {
-        if (!b_IsCoralOutputDisabled || true) {
+        //if (!b_IsCoralOutputDisabled || true) {
             b_IsCoralOutputDisabled = true;
             b_IsCoralEjecting = true; 
             m_DeliveryMotor.set(es_EjectSpeed.value);
             d_TargetCoralPosition = getDeliveryPosition() + d_CoralOutTravel;
-        }
+        //}
 
         return this;
     }
