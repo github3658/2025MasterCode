@@ -335,12 +335,13 @@ public void runPivotToPose(PivotTarget target) {
     }
 
     public boolean hasCoral() {
-        if (s_DeliveryRange.getIsDetected().getValue()) {
-            SmartDashboard.putNumber("Detected Distance", s_DeliveryRange.getDistance().getValueAsDouble());
-            SmartDashboard.putNumber("Coral_In_Strength", s_DeliveryRange.getSignalStrength().getValueAsDouble());
-        }
+        // if (s_DeliveryRange.getIsDetected().getValue()) {
+        //     SmartDashboard.putNumber("Detected Distance", s_DeliveryRange.getDistance().getValueAsDouble());
+        //     SmartDashboard.putNumber("Coral_In_Strength", s_DeliveryRange.getSignalStrength().getValueAsDouble());
+        // }
         SmartDashboard.putNumber("Coral Signal Strength", s_DeliveryRange.getSignalStrength().getValueAsDouble());
-        return s_DeliveryRange.getIsDetected().getValue();
+        return s_DeliveryRange.getIsDetected().getValue() && (s_DeliveryRange.getSignalStrength().getValueAsDouble() > 50000);
+
     }
 
     public void setEjectSpeed(EjectSpeed es) {
