@@ -109,12 +109,12 @@ public class DriveToPoseCommand extends Command {
         s_Swerve = s;
         s_Elevator = e;
         p_Target = target;
-        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
-            p_TargetPose = new Pose2d(new Translation2d(-target.x, -target.y), new Rotation2d(-target.angle));
-        }
-        else {
+        // if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+        //     p_TargetPose = new Pose2d(new Translation2d(-target.x, -target.y), new Rotation2d(target.angle));
+        // }
+        // else {
             p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
-        }
+        // }
         addRequirements(s_Swerve);
     }
     //endregion
@@ -123,12 +123,12 @@ public class DriveToPoseCommand extends Command {
         s_Swerve = s;
         s_Elevator = e;
         p_Target = target;
-        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
-            p_TargetPose = new Pose2d(new Translation2d(-target.x, target.y), new Rotation2d(target.angle));
-        }
-        else {
-            p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
-        }
+        // if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+        //     p_TargetPose = new Pose2d(new Translation2d(-target.x, -target.y), new Rotation2d(target.angle));
+        // }
+        // else {
+             p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
+        // }
         c_SwerveRampDeadzone = deadzone;
         addRequirements(s_Swerve);
     }
@@ -158,13 +158,14 @@ public class DriveToPoseCommand extends Command {
         if (DriverStation.getAlliance().get() == Alliance.Blue) {
             blueAlliance = -1;
         }
+
         Logger.writeDouble("X Position", currentPose.getX());
         Logger.writeDouble("Y Position", currentPose.getY());
         Logger.writeDouble("Rotation", currentPose.getRotation().getRadians());
         s_Swerve.setControl(drive_field.
             withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) * blueAlliance *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
             .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * blueAlliance * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
-            .withRotationalRate(d_Rotate * d_SwerveRamp * blueAlliance * c_MaxSwerveAngularRate)
+            .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
         );
 
         // System.out.println("Can Coder: " + s_Swerve.getModule(0).getEncoder().getPosition().getValueAsDouble());

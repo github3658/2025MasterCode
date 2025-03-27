@@ -14,6 +14,7 @@ import frc.robot.commands.DriveToPoseCommand.Position;
 import frc.robot.commands.autonomous.AutonomousPrograms;
 import frc.robot.commands.autonomous.ButtonPanelPressCommand;
 
+import com.ctre.phoenix6.configs.MountPoseConfigs;
 import com.ctre.phoenix6.controls.MusicTone;
 
 import edu.wpi.first.cameraserver.CameraServer;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.generated.TunerConstants;
 
@@ -135,6 +137,9 @@ public class Robot extends TimedRobot {
   //region AutonInit
   @Override
   public void autonomousInit() {
+    // if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+    //   s_Swerve.getPigeon2().getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(90));
+    // }
     Logger.writeString("Autonomous Init", "Autonomous Init");
     // We'll count the reef faces from 1 to 6
     s_Swerve.resetPose(new Pose2d());
@@ -250,6 +255,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     bp_Operator.AutonCancel();
+    s_Swerve.getPigeon2().getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(-90));
   }
 double counter = 0.0;
   @Override
