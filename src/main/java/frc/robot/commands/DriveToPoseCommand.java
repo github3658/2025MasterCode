@@ -135,6 +135,7 @@ public class DriveToPoseCommand extends Command {
     //endregion
     @Override
     public void initialize() {
+        Logger.write2DTargetPos(p_TargetPose);
     }
     //region Execute
     @Override

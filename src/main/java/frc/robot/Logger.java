@@ -13,6 +13,7 @@ public class Logger {
     private static final NetworkTable table = nt.getTable("RoboBeavers");
 
     private static StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("MyPose", Pose2d.struct).publish();
+    private static StructPublisher<Pose2d> targetPublisher = NetworkTableInstance.getDefault().getStructTopic("TargetPose", Pose2d.struct).publish();
     private static StructArrayPublisher<Pose2d> arrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("MyPoseArray", Pose2d.struct).publish();
         
     public static void initLogger() {
@@ -37,6 +38,11 @@ public class Logger {
     public static void write2DPos(Pose2d pos) {
         publisher.set(pos);
     }
+
+    public static void write2DTargetPos(Pose2d pos) {
+        targetPublisher.set(pos);
+    }
+
     public static void write2DPosArray(Pose2d[] pos) {
         arrayPublisher.set(pos);
     }
