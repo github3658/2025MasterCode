@@ -14,6 +14,7 @@ import frc.robot.commands.DriveToPoseCommand.Position;
 import frc.robot.commands.autonomous.AutonomousPrograms;
 import frc.robot.commands.autonomous.ButtonPanelPressCommand;
 
+import com.ctre.phoenix6.configs.MountPoseConfigs;
 import com.ctre.phoenix6.controls.MusicTone;
 
 import edu.wpi.first.cameraserver.CameraServer;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.generated.TunerConstants;
 
@@ -45,9 +47,11 @@ public class Robot extends TimedRobot {
   private ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
   private EndoFactorSubsystem s_EndEffector = new EndoFactorSubsystem();
   private ClimbSubsystem s_ClimbSubsystem = new ClimbSubsystem();
-
+  //region RobotInit
   @Override
   public void robotInit() {
+    Logger.writeString("Robot Init", "Robot Init");
+    Logger.initLogger();
     s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, s_Elevator, xb_Driver));
     s_Elevator.setDefaultCommand(new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector));
     s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
@@ -55,9 +59,11 @@ public class Robot extends TimedRobot {
     s_Elevator.setLocked(true);
     CameraServer.startAutomaticCapture();
   }
-  
+  //endregion
+  //region RobotPeriodic
   @Override
   public void robotPeriodic() {
+    Logger.writeString("Robot Periodic", "Robot Periodic");
     SmartDashboard.putNumber("-BOT X", s_Swerve.getState().Pose.getX());
     SmartDashboard.putNumber("-BOT Y", s_Swerve.getState().Pose.getY());
     SmartDashboard.putNumber("-BOT ROTATION", s_Swerve.getState().Pose.getRotation().getDegrees());
@@ -111,18 +117,30 @@ public class Robot extends TimedRobot {
     // }
     // // // // // //
   }
+  //endregion
+  //region Disabled
+  @Override
+  public void disabledInit() {
+    Logger.writeString("Disabled Init", "Disabled Init");
+  }
+  
+  @Override
+  public void disabledPeriodic() {
+    Logger.writeString("Disabled Periodic", "Disabled Periodic");
+  }
 
   @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void disabledExit() {}
-
+  public void disabledExit() {
+    Logger.writeString("Disabled Exit", "Disabled Exit");
+  }
+  //endregion
+  //region AutonInit
   @Override
   public void autonomousInit() {
+    // if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+    //   s_Swerve.getPigeon2().getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(90));
+    // }
+    Logger.writeString("Autonomous Init", "Autonomous Init");
     // We'll count the reef faces from 1 to 6
     s_Swerve.resetPose(new Pose2d());
 
@@ -185,9 +203,11 @@ public class Robot extends TimedRobot {
     
     // LimelightHelpers.setPipelineIndex(Config.kLimelight, 0);
   }
-
+  //endregion
+  //region AutonPeriodic
   @Override
   public void autonomousPeriodic() {
+    Logger.writeString("Autonomous Periodic", "Autonomous Periodic");
     // boolean hasTarget = LimelightHelpers.getTV(Config.kLimelight);
 
   //   if (hasTarget) {
@@ -227,13 +247,15 @@ public class Robot extends TimedRobot {
 
     // SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
   }
-
+  //region AutonExit
   @Override
   public void autonomousExit() {}
-
+  //endregion
+  //region Teleop
   @Override
   public void teleopInit() {
     bp_Operator.AutonCancel();
+    s_Swerve.getPigeon2().getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(-90));
   }
 double counter = 0.0;
   @Override
@@ -244,7 +266,8 @@ double counter = 0.0;
   }
   @Override
   public void teleopExit() {}
-
+  //endregion
+  //region Test
   @Override
   public void testInit() {
     s_Swerve.removeDefaultCommand();
@@ -332,3 +355,4 @@ double counter = 0.0;
   @Override
   public void simulationPeriodic() {}
 }
+//endregion

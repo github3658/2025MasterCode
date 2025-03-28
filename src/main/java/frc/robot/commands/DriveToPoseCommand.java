@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import frc.robot.Logger;
+
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 
@@ -16,6 +18,8 @@ import frc.robot.subsystems.SwerveDrivetrainSubsystem;
 public class DriveToPoseCommand extends Command {
     // These are the positions the robot should drive to.
     // The origin is the center of the field, behind the robot starting line.
+    private boolean b_FieldInversion;
+    //region Position
     public enum Position {
         // Can be used from any starting position
         Origin(0, 0, 0),
@@ -39,15 +43,13 @@ public class DriveToPoseCommand extends Command {
         Reef8ABackup(6.94, -3.883, -120.08),
         Reef8ABackupSpin(6.94, -3.883, -180),
 
-
         // LEFT ONLY
-        Reef11ACoral(4.544, 5.189, 58.9),
-        invCoralStationBackup(11.861, 2.722, 125.75),
-        invCoralStation(12.90, 1.70, 125.75),
-        Reef12ACoral(7.1, 6.025, 119.9),
-        Reef12ABackup(8.1, 5.025, 119.9),
+        Reef11ACoral(Reef9ACoral.x, -Reef9ACoral.y, -Reef9ACoral.angle),
+        invCoralStationBackup(CoralStationBackup.x, -CoralStationBackup.y, -CoralStationBackup.angle),
+        invCoralStation(CoralStation.x, -CoralStation.y, -CoralStation.angle),
+        Reef12ACoral(Reef8ACoral.x, -Reef8ACoral.y, -Reef8ACoral.angle),
+        Reef12ABackup(Reef8ABackup.x, -Reef8ABackup.y, -Reef8ABackup.angle)
 // TODO: Check in practice field for alignment.
-
         ;
         public double x, y, angle, maxspeed;
         public Pose2d pose;
@@ -66,7 +68,7 @@ public class DriveToPoseCommand extends Command {
             this.pose = new Pose2d(new Translation2d(x, y), Rotation2d.fromDegrees(angle));
         }
     }
-
+    //endregion
     // 1 UNIT ~ 50 cm
 
     // The maximum Swerve speed
@@ -101,38 +103,40 @@ public class DriveToPoseCommand extends Command {
 
     private SwerveDrivetrainSubsystem s_Swerve;
     private ElevatorSubsystem s_Elevator;
-
+    
+    //region Drive-to-pose
     public DriveToPoseCommand(SwerveDrivetrainSubsystem s, ElevatorSubsystem e, Position target) {
         s_Swerve = s;
         s_Elevator = e;
         p_Target = target;
-        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
-            p_TargetPose = new Pose2d(new Translation2d(-target.x, target.y), new Rotation2d(target.angle));
-        }
-        else {
+        // if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+        //     p_TargetPose = new Pose2d(new Translation2d(-target.x, -target.y), new Rotation2d(target.angle));
+        // }
+        // else {
             p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
-        }
+        // }
         addRequirements(s_Swerve);
     }
-
+    //endregion
+    //region 2nd Drive-to-pose?
     public DriveToPoseCommand(SwerveDrivetrainSubsystem s, ElevatorSubsystem e, Position target, double deadzone) {
         s_Swerve = s;
         s_Elevator = e;
         p_Target = target;
-        if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
-            p_TargetPose = new Pose2d(new Translation2d(-target.x, target.y), new Rotation2d(target.angle));
-        }
-        else {
-            p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
-        }
+        // if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+        //     p_TargetPose = new Pose2d(new Translation2d(-target.x, -target.y), new Rotation2d(target.angle));
+        // }
+        // else {
+             p_TargetPose = target.pose;//new Pose2d(new Translation2d(target.getX()/50, target.getY()/50), new Rotation2d(0));
+        // }
         c_SwerveRampDeadzone = deadzone;
         addRequirements(s_Swerve);
     }
-    
+    //endregion
     @Override
     public void initialize() {
     }
-
+    //region Execute
     @Override
     public void execute() {
         Pose2d currentPose = s_Swerve.getState().Pose;
@@ -155,10 +159,13 @@ public class DriveToPoseCommand extends Command {
             blueAlliance = -1;
         }
 
+        Logger.writeDouble("X Position", currentPose.getX());
+        Logger.writeDouble("Y Position", currentPose.getY());
+        Logger.writeDouble("Rotation", currentPose.getRotation().getRadians());
         s_Swerve.setControl(drive_field.
             withVelocityX(-d_Forward * d_SwerveRamp * (1-elevatorSpeedReduction) * blueAlliance *  c_MaxSwerveSpeed * p_Target.maxspeed) // Drive forward with negative Y (forward)
             .withVelocityY(-d_Strafe * d_SwerveRamp * (1-elevatorSpeedReduction) * blueAlliance * c_MaxSwerveSpeed * p_Target.maxspeed) // Drive left with negative X (left)
-            .withRotationalRate(d_Rotate * d_SwerveRamp * blueAlliance * c_MaxSwerveAngularRate)
+            .withRotationalRate(d_Rotate * d_SwerveRamp * c_MaxSwerveAngularRate)
         );
 
         // System.out.println("Can Coder: " + s_Swerve.getModule(0).getEncoder().getPosition().getValueAsDouble());
@@ -166,7 +173,7 @@ public class DriveToPoseCommand extends Command {
         // System.out.println("Y POS: " + s_Swerve.getState().Pose.getY());
         // System.out.println("ROT: " + s_Swerve.getState().Pose.getRotation().getDegrees());
     }
-
+    //endregion
     @Override
     public boolean isFinished() {
         i_Frames++;

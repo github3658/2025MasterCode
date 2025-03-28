@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
+import frc.robot.Logger;
 import frc.robot.subsystems.LEDSubsystem.Color;
 
 public class EndoFactorSubsystem extends SubsystemBase {
@@ -31,7 +32,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
             new CANrangeConfiguration()
                 .withProximityParams(
                     new ProximityParamsConfigs()
-                        .withProximityThreshold(0.05)
+                        .withProximityThreshold(0.07) //Changed to 0.1 for increased detection distance. Was 0.05 although that gave a possibility of detection distance dipping below the coral.
                         .withProximityHysteresis(0.01)
                 )
                 .withFovParams(
@@ -102,7 +103,6 @@ public class EndoFactorSubsystem extends SubsystemBase {
 
     //endregion
 
-    //region Methods
     //region Coral
     public EndoFactorSubsystem intakeCoral() {
         if (!b_IsCoralIntakeDisabled) {
@@ -117,12 +117,12 @@ public class EndoFactorSubsystem extends SubsystemBase {
     }
 
     public EndoFactorSubsystem ejectCoral() {
-        if (!b_IsCoralOutputDisabled || true) {
+        //if (!b_IsCoralOutputDisabled || true) {
             b_IsCoralOutputDisabled = true;
             b_IsCoralEjecting = true; 
             m_DeliveryMotor.set(es_EjectSpeed.value);
             d_TargetCoralPosition = getDeliveryPosition() + d_CoralOutTravel;
-        }
+        //}
 
         return this;
     }
@@ -336,7 +336,10 @@ public void runPivotToPose(PivotTarget target) {
     }
 
     public boolean hasCoral() {
-        return s_DeliveryRange.getIsDetected().getValue();
+        boolean isDetected = s_DeliveryRange.getIsDetected().getValue() && (s_DeliveryRange.getSignalStrength().getValueAsDouble() > 50000);
+        Logger.writeBoolean("Has Coral", isDetected);
+        return isDetected;
+
     }
 
     public void setEjectSpeed(EjectSpeed es) {
@@ -353,7 +356,7 @@ public void runPivotToPose(PivotTarget target) {
         SmartDashboard.putString("Endofactor - target position", pt_PivotTarget.name());
         SmartDashboard.putBoolean("Endofactor - is safe?", isSafe());
         SmartDashboard.putBoolean("Endofactor - has coral?", hasCoral());
-        SmartDashboard.putNumber("Endofactor - measure", s_DeliveryRange.getDistance().getValueAsDouble());
+        SmartDashboard.putNumber("Endofactor - measure CORAL DISTANCE", s_DeliveryRange.getDistance().getValueAsDouble());
         //SmartDashboard.putNumber("Endofactor - Delivery stator current", m_DeliveryMotor.getStatorCurrent().getValueAsDouble());
         //SmartDashboard.putNumber("Endofactor - Delivery voltage", m_DeliveryMotor.getMotorVoltage().getValueAsDouble());
         if (maxDeliveyCurrent < m_DeliveryMotor.getSupplyCurrent().getValueAsDouble()) 

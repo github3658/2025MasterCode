@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import frc.robot.Logger;
+
 import com.ctre.phoenix6.swerve.*;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
