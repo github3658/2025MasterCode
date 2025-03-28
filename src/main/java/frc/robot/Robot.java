@@ -152,7 +152,7 @@ public class Robot extends TimedRobot {
       AutonomousPrograms.auto_Right(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
     }
     else if (msg.equalsIgnoreCase("left")) {
-      AutonomousPrograms.auto_Left(s_Swerve, s_Elevator, bp_Operator, s_EndEffector);
+      AutonomousPrograms.auto_Left(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
     }
     else if (msg.equalsIgnoreCase("test1")) {
       System.out.print("test1");
