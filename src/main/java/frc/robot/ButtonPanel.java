@@ -10,8 +10,8 @@ public class ButtonPanel {
         ElevatorPosition3(3, 3),
         ElevatorPosition4(4, 4),
         ElevatorPositionBarge(5, 5),
-        ManualClaw1(6),
-        ManualClaw2(7),
+        ManualClaw1(6, 6),
+        ManualClaw2(7, 7),
         ClawPositionCoral(12, 12),
         ClawPositionAlgae(13, 13),
         CoralIn(8, 8),
@@ -67,9 +67,9 @@ public class ButtonPanel {
         button_panel.setOutput(button.indicator, on);
     }
 
-    public void AlgeaCancel() { // This command (should) cancel the algea button press at the end of autonomous in case that it is not cancelled during.
+    public void AlgaeCancel() { // This command (should) cancel the algea button press at the end of autonomous in case that it is not cancelled during.
         Button.AlgaeIn.pressed = false;
-        System.out.println("AlgeaCanceled");
+        System.out.println("AlgaeCanceled");
     }
     
     public void AutonCancel() { // This command (should) cancel all button presses at the end of autonomous in case they are not calcelled during autonomous.

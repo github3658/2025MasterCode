@@ -17,15 +17,22 @@ import frc.robot.commands.*; // This imports all of our commands.
 import frc.robot.commands.DriveToPoseCommand.Position;
 import frc.robot.commands.autonomous.AutonomousPrograms;
 import frc.robot.commands.autonomous.ButtonPanelPressCommand;
+
+import com.ctre.phoenix6.configs.MountPoseConfigs;
+import com.ctre.phoenix6.controls.MusicTone;
+
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.generated.TunerConstants;
 
@@ -44,9 +51,11 @@ public class Robot extends TimedRobot {
   private ElevatorSubsystem s_Elevator = new ElevatorSubsystem();
   private EndoFactorSubsystem s_EndEffector = new EndoFactorSubsystem();
   private ClimbSubsystem s_ClimbSubsystem = new ClimbSubsystem();
-
+  //region RobotInit
   @Override
   public void robotInit() {
+    Logger.writeString("Robot Init", "Robot Init");
+    Logger.initLogger();
     s_Swerve.setDefaultCommand(new SwerveDriveCommand(s_Swerve, s_Elevator, xb_Driver));
     s_Elevator.setDefaultCommand(new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector));
     s_EndEffector.setDefaultCommand(new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator));
@@ -54,9 +63,11 @@ public class Robot extends TimedRobot {
     s_Elevator.setLocked(true);
     CameraServer.startAutomaticCapture();
   }
-  
+  //endregion
+  //region RobotPeriodic
   @Override
   public void robotPeriodic() {
+    Logger.writeString("Robot Periodic", "Robot Periodic");
     SmartDashboard.putNumber("-BOT X", s_Swerve.getState().Pose.getX());
     SmartDashboard.putNumber("-BOT Y", s_Swerve.getState().Pose.getY());
     SmartDashboard.putNumber("-BOT ROTATION", s_Swerve.getState().Pose.getRotation().getDegrees());
@@ -87,7 +98,10 @@ public class Robot extends TimedRobot {
     }
 
     // LED Controls
-    if (!s_Elevator.isFinished() || !s_EndEffector.isFinished()) {
+    if (!DriverStation.isDSAttached()) {
+      s_LED.setColor(Color.Magenta);
+    }
+    else if (!s_Elevator.isFinished() || !s_EndEffector.isFinished()) {
       s_LED.setColor(Color.Yellow);
     }
     else if (s_EndEffector.hasCoral()) {
@@ -98,27 +112,39 @@ public class Robot extends TimedRobot {
     }
 
     // POSE TESTING //
-    if (xb_Driver.getYButtonPressed()) {
-      new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ACoral, 0.05).schedule();
-    }
+    // if (xb_Driver.getYButtonPressed()) {
+    //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Reef8ACoral, 0.05).schedule();
+    // }
 
-    if (xb_Driver.getBButtonPressed()) {
-      new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin, 0.05).schedule();
-    }
+    // if (xb_Driver.getBButtonPressed()) {
+    //   new DriveToPoseCommand(s_Swerve, s_Elevator, Position.Origin, 0.05).schedule();
+    // }
     // // // // // //
+  }
+  //endregion
+  //region Disabled
+  @Override
+  public void disabledInit() {
+    Logger.writeString("Disabled Init", "Disabled Init");
+  }
+  
+  @Override
+  public void disabledPeriodic() {
+    Logger.writeString("Disabled Periodic", "Disabled Periodic");
   }
 
   @Override
-  public void disabledInit() {}
-
-  @Override
-  public void disabledPeriodic() {}
-
-  @Override
-  public void disabledExit() {}
-
+  public void disabledExit() {
+    Logger.writeString("Disabled Exit", "Disabled Exit");
+  }
+  //endregion
+  //region AutonInit
   @Override
   public void autonomousInit() {
+    // if (DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Blue) {
+    //   s_Swerve.getPigeon2().getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(90));
+    // }
+    Logger.writeString("Autonomous Init", "Autonomous Init");
     // We'll count the reef faces from 1 to 6
     s_Swerve.resetPose(new Pose2d());
 
@@ -130,7 +156,7 @@ public class Robot extends TimedRobot {
       AutonomousPrograms.auto_Right(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
     }
     else if (msg.equalsIgnoreCase("left")) {
-      AutonomousPrograms.auto_Left(s_Swerve, s_Elevator, bp_Operator, s_EndEffector);
+      AutonomousPrograms.auto_Left(s_Swerve, s_Elevator, bp_Operator, s_EndEffector).schedule();
     }
     else if (msg.equalsIgnoreCase("test1")) {
       System.out.print("test1");
@@ -181,9 +207,11 @@ public class Robot extends TimedRobot {
     
     // LimelightHelpers.setPipelineIndex(Config.kLimelight, 0);
   }
-
+  //endregion
+  //region AutonPeriodic
   @Override
   public void autonomousPeriodic() {
+    Logger.writeString("Autonomous Periodic", "Autonomous Periodic");
     // boolean hasTarget = LimelightHelpers.getTV(Config.kLimelight);
 
   //   if (hasTarget) {
@@ -208,30 +236,31 @@ public class Robot extends TimedRobot {
   //     SmartDashboard.putString("AprilTag Status", "No target detected");
   // }
 
-    NetworkTable table = NetworkTableInstance.getDefault().getTable(Config.kLimelight);
-    NetworkTableEntry ty = table.getEntry("ty");
-    double targetOffsetAngle_Vertical = ty.getDouble(0.0);
-    double limelightMountAngleDegrees = 27.0;
-    double limelightLenseHeightInches = 8.5;
+    // NetworkTable table = NetworkTableInstance.getDefault().getTable(Config.kLimelight);
+    // NetworkTableEntry ty = table.getEntry("ty");
+    // double targetOffsetAngle_Vertical = ty.getDouble(0.0);
+    // double limelightMountAngleDegrees = 27.0;
+    // double limelightLenseHeightInches = 8.5;
 
-    double goalHeightInches = 50.125;
+    // double goalHeightInches = 50.125;
 
-    double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
-    double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
+    // double angleToGoalDegrees = limelightMountAngleDegrees + targetOffsetAngle_Vertical;
+    // double angleToGoalRadians = angleToGoalDegrees * (3.14159 / 180.0);
 
-    double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLenseHeightInches) / Math.tan(angleToGoalRadians);
+    // double distanceFromLimelightToGoalInches = (goalHeightInches - limelightLenseHeightInches) / Math.tan(angleToGoalRadians);
 
-    SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
+    // SmartDashboard.putNumber("DISTANCE TO TAG", distanceFromLimelightToGoalInches);
   }
-
+  //region AutonExit
   @Override
-  public void autonomousExit() {
-      bp_Operator.AlgeaCancel();
-      bp_Operator.AutonCancel();
+  public void autonomousExit() {}
+  //endregion
+  //region Teleop
+  @Override
+  public void teleopInit() {
+    bp_Operator.AutonCancel();
+    s_Swerve.getPigeon2().getConfigurator().apply(new MountPoseConfigs().withMountPoseYaw(-90));
   }
-
-  @Override
-  public void teleopInit() {}
 double counter = 0.0;
   @Override
   public void teleopPeriodic() {
@@ -241,33 +270,93 @@ double counter = 0.0;
   }
   @Override
   public void teleopExit() {}
-
+  //endregion
+  //region Test
   @Override
   public void testInit() {
-    // CommandScheduler.getInstance().cancelAll();
-    // s_Swerve.InitializeHonk();
-    new SequentialCommandGroup(
-    new ButtonPanelPressCommand(Button.ClawPositionAlgae, true),
-    new ButtonPanelPressCommand(Button.AlgaeOut, true)
-    );
+    s_Swerve.removeDefaultCommand();
+    s_Elevator.removeDefaultCommand();
+    s_EndEffector.removeDefaultCommand();
+    s_ClimbSubsystem.removeDefaultCommand();
+    for (Button button : Button.values()) {
+      bp_Operator.setIndicatorLight(button, false);
+    }
+    d_MoleRate = 0.01;
+    b_GameOver = false;
+    for (int i = 0; i < i_MolesUp.length; i++) {
+      i_MolesUp[i] = 0;
+    }
+    i_Score = 0;
+    i_GameOverTimer = 0;
+
+    // new ParallelCommandGroup(
+    //   new ElevatorDefaultCommand(s_Elevator, bp_Operator, s_EndEffector).ignoringDisable(true),
+    //   new EndoFactorDefaultCommand(s_EndEffector, bp_Operator, s_Elevator).ignoringDisable(true),
+    //   new SequentialCommandGroup(
+    //     new ButtonPanelPressCommand(Button.ElevatorPosition2, true),
+    //     new ButtonPanelPressCommand(Button.ClawPositionAlgae, true),
+    //     new ButtonPanelPressCommand(Button.AlgaeOut, true)
+    //   )
+    // ).schedule();
   }
 
+  double d_MoleRate;
+  boolean b_GameOver;
+  int[] i_MolesUp = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int i_Score;
+  int i_GameOverTimer;
   @Override
   public void testPeriodic() {
-    // if (bp_Operator.getButton(Button.HONK)) {
-    //   s_Swerve.Honk(true);
-    // }
-    // else {
-    //   s_Swerve.Honk(false);
-    // }
+    if (Math.random() < d_MoleRate) {
+      int b = ((int) Math.floor(Math.random() * 13)) + 1;
+      i_MolesUp[b-1] = Math.max(i_MolesUp[b-1], 1);
+    }
+
+    int i = 0;
+    s_EndEffector.beep(false);
+    for (Button button : Button.values()) {
+      if (i >= 13) {
+        continue;
+      }
+      if (b_GameOver) {
+        i_GameOverTimer ++;
+        bp_Operator.setIndicatorLight(button, (i_GameOverTimer % 10 < 5) && i_GameOverTimer < 60);
+        if (i_GameOverTimer == 60) {
+          System.out.println("GAME OVER!");
+          System.out.println("Your final score was "+i_Score+"!");
+        }
+        break;
+      }
+      
+      if (bp_Operator.getButtonPressed(button)) {
+        if (i_MolesUp[i] > 0) {
+          i_MolesUp[i] = 0;
+          i_Score ++;
+          s_EndEffector.beep(true);
+        }
+        else {
+          b_GameOver = true;
+        }
+      }
+      else {
+        if (i_MolesUp[i] > 0) {
+          i_MolesUp[i] ++;
+        }
+        if (i_MolesUp[i] > 150) {
+          b_GameOver = true;
+        }
+      }
+      bp_Operator.setIndicatorLight(button, (i_MolesUp[i] > 0 && i_MolesUp[i] < 100) || (i_MolesUp[i] % 10 > 5));
+      i++;
+    }
+    d_MoleRate *= 1.0001;
+    SmartDashboard.putNumber("Mole Rate", d_MoleRate);
   }
 
   @Override
-  public void testExit() {
-    bp_Operator.AlgeaCancel();
-
-  }
+  public void testExit() {}
 
   @Override
   public void simulationPeriodic() {}
 }
+//endregion

@@ -8,13 +8,16 @@ import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.configs.FovParamsConfigs;
 import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MusicTone;
 import com.ctre.phoenix6.hardware.CANcoder;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Config;
+import frc.robot.Logger;
 import frc.robot.subsystems.LEDSubsystem.Color;
 
 public class EndoFactorSubsystem extends SubsystemBase {
@@ -29,7 +32,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
             new CANrangeConfiguration()
                 .withProximityParams(
                     new ProximityParamsConfigs()
-                        .withProximityThreshold(0.05)
+                        .withProximityThreshold(0.07) //Changed to 0.1 for increased detection distance. Was 0.05 although that gave a possibility of detection distance dipping below the coral.
                         .withProximityHysteresis(0.01)
                 )
                 .withFovParams(
@@ -38,6 +41,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
                         .withFOVRangeY(6.75)
                 )
         );
+        PivotTarget.CoralIntake.value = s_PivotEncoder.getAbsolutePosition(true).getValueAsDouble();
     }
 
     private final double d_IntakeMotorSpeed = 0.125;
@@ -52,7 +56,7 @@ public class EndoFactorSubsystem extends SubsystemBase {
         }
     }
     private EjectSpeed es_EjectSpeed = EjectSpeed.Level1;
-    private final double d_PivotMotorSpeed = 0.145;
+    private final double d_PivotMotorSpeed = 0.135;
     private final double c_PivotSupplyCurrentLimit = 3;
     private boolean b_hasCoral;
     
@@ -83,7 +87,10 @@ public class EndoFactorSubsystem extends SubsystemBase {
     /** The number of encoder ticks required to eject the coral from when the play presses the button. */
     private final double d_CoralOutTravel = 7.5;
 
+    private final double d_MaxAlgaePulseTime = 1.0;
+
     private final Timer t_CoralIntakeTimer = new Timer();
+    private final Timer t_AlgaePulseTimer = new Timer();
     /** If true this prevents the player from ejecting the coral */
     private boolean b_IsCoralOutputDisabled; 
     /** If true this prevents the player from intaking the coral */
@@ -92,10 +99,10 @@ public class EndoFactorSubsystem extends SubsystemBase {
     private boolean b_IsCoralRunningIntakeToPose;
     private boolean b_IsCoralEjecting;
     private double d_TargetCoralPosition;
+    private boolean b_HoldingAlgae;
 
     //endregion
 
-    //region Methods
     //region Coral
     public EndoFactorSubsystem intakeCoral() {
         if (!b_IsCoralIntakeDisabled) {
@@ -110,12 +117,12 @@ public class EndoFactorSubsystem extends SubsystemBase {
     }
 
     public EndoFactorSubsystem ejectCoral() {
-        if (!b_IsCoralOutputDisabled || true) {
+        //if (!b_IsCoralOutputDisabled || true) {
             b_IsCoralOutputDisabled = true;
             b_IsCoralEjecting = true; 
             m_DeliveryMotor.set(es_EjectSpeed.value);
             d_TargetCoralPosition = getDeliveryPosition() + d_CoralOutTravel;
-        }
+        //}
 
         return this;
     }
@@ -187,13 +194,15 @@ public class EndoFactorSubsystem extends SubsystemBase {
 
     //region Algae
     public void intakeAlgae() {
-        //TODO: Should this be changed to listen to the limit switch, hasAlgae.
-        double speed = m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit ? 0 : -d_IntakeMotorSpeed;
+        double speed = (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit) ? 0 : -d_IntakeMotorSpeed;
         
         m_DeliveryMotor.set(speed);
     }
 
     public void ejectAlgae() {
+        b_HoldingAlgae = false;
+        t_AlgaePulseTimer.stop();
+        t_AlgaePulseTimer.reset();
         m_DeliveryMotor.set(0.50);
     }
 
@@ -210,11 +219,34 @@ public class EndoFactorSubsystem extends SubsystemBase {
         b_canGoToCoralPos = allowed;
     }
 
-    public boolean hasAlgae() {
+    public boolean hasAlgaeLimitSwitch() {
         SmartDashboard.putBoolean("Algae Limit Switch", dio_LimitSwitch.get());
         return dio_LimitSwitch.get();
-        // return (m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit);
     }
+
+    public boolean hasAlgaeCurrentLimit() {
+        return m_DeliveryMotor.getSupplyCurrent().getValueAsDouble() > c_DeliverySupplyCurrentLimit;
+    }
+
+    public boolean likelyHasAlgae() {
+        return b_HoldingAlgae;
+    }
+
+    public boolean isAlgaePulseRunning() {
+        return t_AlgaePulseTimer.isRunning();
+    }
+
+    private MusicTone mt_440 = new MusicTone(440);
+    private MusicTone mt_0 = new MusicTone(0);
+    public void beep(boolean beeping) {
+        if (DriverStation.isTestEnabled() && beeping) {
+            m_DeliveryMotor.setControl(mt_440);
+        }
+        else {
+            m_DeliveryMotor.setControl(mt_0);
+        }
+    }
+
     //endregion
     //endregion
     //endregion
@@ -227,9 +259,9 @@ public class EndoFactorSubsystem extends SubsystemBase {
     // TODO: Change to reflect the values of the CANcoder at these positions in the end.
     public enum PivotTarget {
         CoralIntake(-0.415),
-        SafetyTarget(-0.366),
+        SafetyTarget(-0.36),
         Level1(-0.415),
-        Level2AndLevel3(-0.366),
+        Level2AndLevel3(-0.36),
         Level4(-0.243),
         AlgaeIntake(0.128),
         AlgaeIntakeStow(0.050),
@@ -250,14 +282,27 @@ public void runPivotToPose(PivotTarget target) {
     double c_Current = m_PivotMotor.getSupplyCurrent().getValueAsDouble();
     double speed = c_Current > c_PivotSupplyCurrentLimit ? 0 : Math.min(Math.max((target.value - d_CurrentPose) * 35, -1), 1);
     
-if (c_Current > _maxCurrent) _maxCurrent = c_Current;
-    SmartDashboard.putNumber("Algae Current", _maxCurrent);
-    SmartDashboard.putNumber("Algae Speed", speed* d_PivotMotorSpeed);
     m_PivotMotor.set(speed * d_PivotMotorSpeed);
 }
 
+    private boolean b_IsSafe;
+    private int i_SafeSamples;
+    private final int c_MaxSafeSamples = 15;
+    public boolean isSafeSample() {
+        return(getPivotPosition() >= PivotTarget.SafetyTarget.value - 0.01);
+    }
+
     public boolean isSafe() {
-        return(getPivotPosition() >= PivotTarget.SafetyTarget.value - 0.004);
+        if (isSafeSample() != b_IsSafe) {
+            i_SafeSamples ++;
+            if (i_SafeSamples >= c_MaxSafeSamples) {
+                b_IsSafe = isSafeSample();
+            }
+        }
+        else {
+            i_SafeSamples = 0;
+        }
+        return b_IsSafe;
     }
 
     public boolean isFinished() {
@@ -265,7 +310,7 @@ if (c_Current > _maxCurrent) _maxCurrent = c_Current;
     }
 
     public void setPivot(PivotTarget target) {
-        System.out.println("Set pivot!");
+        //System.out.println("Set pivot!");
         pt_PivotTarget = target;
     }
 
@@ -291,7 +336,10 @@ if (c_Current > _maxCurrent) _maxCurrent = c_Current;
     }
 
     public boolean hasCoral() {
-        return s_DeliveryRange.getIsDetected().getValue();
+        boolean isDetected = s_DeliveryRange.getIsDetected().getValue() && (s_DeliveryRange.getSignalStrength().getValueAsDouble() > 50000);
+        Logger.writeBoolean("Has Coral", isDetected);
+        return isDetected;
+
     }
 
     public void setEjectSpeed(EjectSpeed es) {
@@ -308,7 +356,7 @@ if (c_Current > _maxCurrent) _maxCurrent = c_Current;
         SmartDashboard.putString("Endofactor - target position", pt_PivotTarget.name());
         SmartDashboard.putBoolean("Endofactor - is safe?", isSafe());
         SmartDashboard.putBoolean("Endofactor - has coral?", hasCoral());
-        SmartDashboard.putNumber("Endofactor - measure", s_DeliveryRange.getDistance().getValueAsDouble());
+        SmartDashboard.putNumber("Endofactor - measure CORAL DISTANCE", s_DeliveryRange.getDistance().getValueAsDouble());
         //SmartDashboard.putNumber("Endofactor - Delivery stator current", m_DeliveryMotor.getStatorCurrent().getValueAsDouble());
         //SmartDashboard.putNumber("Endofactor - Delivery voltage", m_DeliveryMotor.getMotorVoltage().getValueAsDouble());
         if (maxDeliveyCurrent < m_DeliveryMotor.getSupplyCurrent().getValueAsDouble()) 
@@ -319,6 +367,25 @@ if (c_Current > _maxCurrent) _maxCurrent = c_Current;
 
         SmartDashboard.putNumber("MaxDeliveryCurrent", maxDeliveyCurrent);
         SmartDashboard.putNumber("MaxPivotCurrent", maxPivotCurrent);
+
+        if (getPivotTarget() == PivotTarget.AlgaeIntake && (hasAlgaeLimitSwitch() || hasAlgaeCurrentLimit())) { // When we first obtain algae, set this boolean to true.
+            b_HoldingAlgae = true;
+        }
+
+        if (!(hasAlgaeLimitSwitch() || hasAlgaeCurrentLimit()) && b_HoldingAlgae && !t_AlgaePulseTimer.isRunning()) { // If the limit switch is unset, and we should be holding algae, start the pulse timer
+            t_AlgaePulseTimer.start();
+        }
+
+        if (b_HoldingAlgae && t_AlgaePulseTimer.isRunning() && t_AlgaePulseTimer.get() < d_MaxAlgaePulseTime) { // Run the intake while the timer is less than the max
+            intakeAlgae();
+        }
+        else if ((hasAlgaeLimitSwitch() || hasAlgaeCurrentLimit()) || t_AlgaePulseTimer.get() >= d_MaxAlgaePulseTime || getPivotTarget() != PivotTarget.AlgaeIntake) { // Cancel the intake if we get the algae again or time runs out.
+            if (t_AlgaePulseTimer.get() >= d_MaxAlgaePulseTime || getPivotTarget() != PivotTarget.AlgaeIntake) {
+                b_HoldingAlgae = false;
+            }
+            t_AlgaePulseTimer.stop();
+            t_AlgaePulseTimer.reset();
+        }
         
         //System.out.println("PivotSupply"+m_PivotMotor.getSupplyCurrent().getValueAsDouble());
         //System.out.println("DeliverySupply"+m_DeliveryMotor.getSupplyCurrent().getValueAsDouble());
