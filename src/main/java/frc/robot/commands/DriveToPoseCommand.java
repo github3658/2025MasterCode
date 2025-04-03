@@ -36,7 +36,9 @@ public class DriveToPoseCommand extends Command {
         FleeFromProcessor(5.0, 5.75, 90),
 
         // RIGHT ONLY
-        Reef9ACoral(4.645, -5.270, -60.105),
+        // Reef9ACoral(4.645, -5.270, -60.105),
+        // Reef9ACoral(4.645, -5.170, -60.105),
+        Reef9ACoral(4.695, -5.145, -60.105),
         CoralStationBackup(5.645, -2.542, -124.75),
         CoralStation(11.367, -0.556, -124.75),
         Reef8ACoral(6.94, -5.574, -120.08),
