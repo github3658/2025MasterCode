@@ -77,7 +77,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 speed = (getTargetLevel().value - getEncoderValue()) * 0.05;
             }
             d_ElevatorSpeedRamp = Math.min(d_ElevatorSpeedRamp + 0.1, 1.0);
-            speed = Math.min(Math.max(speed, -0.75 * d_ElevatorSpeedRamp), 0.75 * d_ElevatorSpeedRamp); // Clamp speed
+            speed = Math.min(Math.max(speed, -0.85 * d_ElevatorSpeedRamp), 0.85 * d_ElevatorSpeedRamp); // Clamp speed
             if (!dio_LimitSwitch.get()) {
                 m_LeftElevatorMotor.set(0);
                 //m_RightElevatorMotor.set(0);

@@ -1,11 +1,11 @@
 package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.NetworkTableValue;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Logger {
@@ -17,6 +17,7 @@ public class Logger {
     private static StructArrayPublisher<Pose2d> arrayPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("MyPoseArray", Pose2d.struct).publish();
         
     public static void initLogger() {
+        DataLogManager.start();
         SmartDashboard.putString("RoboBeavers", "Best Team");
     }
     public static void writeBoolean(String key, Boolean value) {
@@ -47,4 +48,3 @@ public class Logger {
         arrayPublisher.set(pos);
     }
 }
-
